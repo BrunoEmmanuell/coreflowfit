@@ -1,20 +1,26 @@
 # frontend/Dockerfile
 
-# Estágio 1: Build do React
-FROM node:18-alpine as build
+# Stage 1: Build React
+# Update from node:18-alpine to node:22-alpine
+FROM node:22-alpine as build
+
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm ci --silent
+
 COPY . .
-# O comando abaixo cria a pasta /app/dist
+# The command below creates the /app/dist folder
 RUN npm run build
 
-# Estágio 2: Servidor Web (Nginx)
+# Stage 2: Web Server (Nginx)
 FROM nginx:alpine
 
-# CORREÇÃO AQUI: Mudamos de /app/build para /app/dist
+# Copy static files from the previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]
