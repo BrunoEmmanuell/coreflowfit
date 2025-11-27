@@ -20,7 +20,7 @@ if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL não definida em .env")
 
 def ensure_sslmode(url: str) -> str:
-    # CORREÇÃO: Se estiver em desenvolvimento, NÃO força SSL
+    # CORREÇÃO: Se estiver em desenvolvimento, NÃO força SSL para o Docker
     if os.getenv("ENVIRONMENT") == "development":
         return url
 

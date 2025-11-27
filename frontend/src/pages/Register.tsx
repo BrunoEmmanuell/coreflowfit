@@ -1,157 +1,172 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import api from "../services/api";
+// src/pages/Register.tsx
+import React, { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { useMutation } from '@tanstack/react-query'
+import api from '@/services/api'
 
-export default function Register() {
-  const [nome, setNome] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+import Input from '@/components/ui/Input'
+import Button from '@/components/ui/Button'
+import Alert from '@/components/ui/Alert'
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+type FormValues = {
+  nome: string
+  email: string
+  senha: string
+  confirmarSenha: string
+}
 
-    // Validações no frontend
-    if (username.length < 3) {
-      setError("O usuário deve ter pelo menos 3 caracteres.");
-      return;
+export default function RegisterPage(): JSX.Element {
+  const navigate = useNavigate()
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<FormValues>({
+    mode: 'onChange',
+    defaultValues: { nome: '', email: '', senha: '', confirmarSenha: '' },
+  })
+
+  const mutation = useMutation({
+    mutationFn: async (payload: { nome: string; email: string; senha: string }) => {
+      // Ajuste as chaves do payload abaixo se seu backend esperar nomes diferentes
+      // Exemplo: { name, email, password } -> nesta API de exemplo usamos nome/email/senha
+      const res = await api.post('/api/v1/instrutores/register', payload)
+      return res.data
+    },
+  })
+
+  const onSubmit = async (values: FormValues) => {
+    // validação extra: confirma senhas
+    if (values.senha !== values.confirmarSenha) {
+      // O react-hook-form já mostra isso, mas deixamos uma salvaguarda
+      return
     }
-    if (senha.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres.");
-      return;
-    }
-    if (!email.includes("@")) {
-      setError("Digite um e-mail válido.");
-      return;
-    }
 
-    setLoading(true);
-
-    try {
-      // CORREÇÃO: Enviando os campos exatos que o Schema do Backend (Pydantic) exige
-      const payload = {
-        nome_completo: nome,  // Backend espera: nome_completo
-        email: email,
-        username: username,
-        password: senha       // Backend espera: password
-      };
-
-      await api.post("/auth/register", payload);
-      
-      alert("Conta criada com sucesso! Faça login.");
-      navigate("/login");
-      
-    } catch (err: any) {
-      console.error(err);
-      
-      // Tratamento de erros detalhado
-      if (err.response?.status === 422) {
-        const detail = err.response.data.detail;
-        if (Array.isArray(detail)) {
-          // Erro de validação específico (ex: formato de email)
-          const campo = detail[0].loc[1];
-          const msg = detail[0].msg;
-          setError(`Erro no campo '${campo}': ${msg}`);
-        } else {
-          setError(detail);
-        }
-      } else if (err.response?.status === 400) {
-        // Erro de negócio (ex: usuário já existe)
-        setError(err.response.data.detail);
-      } else {
-        setError("Erro ao conectar com o servidor. Tente novamente.");
-      }
-    } finally {
-      setLoading(false);
-    }
+    mutation.mutate({
+      nome: values.nome,
+      email: values.email,
+      senha: values.senha,
+    })
   }
 
+  // se sucesso: redireciona para /login depois de mostrar mensagem
+  useEffect(() => {
+    if (mutation.isSuccess) {
+      // redirecionar com pequena pausa para o usuário ver a mensagem
+      const t = setTimeout(() => navigate('/login', { replace: true }), 1600)
+      return () => clearTimeout(t)
+    }
+  }, [mutation.isSuccess, navigate])
+
+  // extrair mensagem de erro amigável
+  const apiErrorMessage = (() => {
+    if (!mutation.isError) return null
+    const e: any = mutation.error
+    return (
+      e?.response?.data?.detail ||
+      e?.response?.data?.message ||
+      e?.message ||
+      'Erro ao registrar. Verifique os dados e tente novamente.'
+    )
+  })()
+
+  const senhaValue = watch('senha')
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
-      <div className="max-w-md w-full bg-slate-800 p-8 rounded-xl shadow-2xl border border-slate-700">
-        <h1 className="text-3xl font-bold text-white text-center mb-6">Crie sua Conta 🚀</h1>
-        
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded mb-4 text-center text-sm font-medium">
-            {error}
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-semibold text-slate-800">Crie sua conta — CoreFlowFit</h1>
+          <p className="text-sm text-slate-500 mt-1">Cadastre-se como personal trainer</p>
+        </div>
+
+        {mutation.isSuccess && (
+          <div className="mb-4">
+            <Alert
+              type="success"
+              title="Cadastro concluído"
+              description="Conta criada com sucesso! Redirecionando para o login..."
+              dismissible
+            />
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block mb-1 text-sm font-medium text-slate-300">Nome Completo</label>
-            <input
-              type="text"
-              className="w-full bg-slate-700 border border-slate-600 rounded p-3 text-white focus:outline-none focus:border-blue-500 transition"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              placeholder="Ex: Bruno Silva"
-            />
+        {apiErrorMessage && (
+          <div className="mb-4">
+            <Alert type="error" title="Erro no cadastro" description={apiErrorMessage} dismissible />
           </div>
+        )}
 
-          <div>
-            <label className="block mb-1 text-sm font-medium text-slate-300">Email</label>
-            <input
+        <form onSubmit={handleSubmit(onSubmit)} className="bg-surface p-6 rounded-2xl shadow-card">
+          <div className="space-y-4">
+            <Input
+              label="Nome completo"
+              placeholder="Seu nome"
+              {...register('nome', {
+                required: 'O nome é obrigatório',
+                minLength: { value: 2, message: 'Informe um nome válido' },
+              })}
+              error={errors.nome?.message}
+            />
+
+            <Input
+              label="Email"
               type="email"
-              className="w-full bg-slate-700 border border-slate-600 rounded p-3 text-white focus:outline-none focus:border-blue-500 transition"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              required
+              placeholder="seu@exemplo.com"
+              {...register('email', {
+                required: 'O email é obrigatório',
+                pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Email inválido' },
+              })}
+              error={errors.email?.message}
             />
-          </div>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium text-slate-300">Usuário (Login)</label>
-            <input
-              type="text"
-              className="w-full bg-slate-700 border border-slate-600 rounded p-3 text-white focus:outline-none focus:border-blue-500 transition"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Mínimo 3 caracteres"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 text-sm font-medium text-slate-300">Senha</label>
-            <input
+            <Input
+              label="Senha"
               type="password"
-              className="w-full bg-slate-700 border border-slate-600 rounded p-3 text-white focus:outline-none focus:border-blue-500 transition"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              placeholder="Mínimo 6 caracteres"
-              required
+              placeholder="Mínimo de 8 caracteres"
+              {...register('senha', {
+                required: 'A senha é obrigatória',
+                minLength: { value: 8, message: 'A senha deve ter pelo menos 8 caracteres' },
+              })}
+              error={errors.senha?.message}
+            />
+
+            <Input
+              label="Confirmar senha"
+              type="password"
+              placeholder="Repita a senha"
+              {...register('confirmarSenha', {
+                required: 'Confirme sua senha',
+                validate: (v) => v === senhaValue || 'As senhas não conferem',
+              })}
+              error={errors.confirmarSenha?.message}
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 mt-4 rounded-lg text-white font-bold transition shadow-lg ${
-              loading 
-                ? "bg-slate-600 cursor-not-allowed" 
-                : "bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500/20"
-            }`}
-          >
-            {loading ? "Criando..." : "Cadastrar"}
-          </button>
-        </form>
+          <div className="mt-6">
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              loading={mutation.isLoading}
+              disabled={!isValid && !mutation.isLoading}
+              className="w-full"
+            >
+              {mutation.isLoading ? 'Cadastrando...' : 'Criar conta'}
+            </Button>
+          </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-slate-400 text-sm">
-            Já tem conta?{" "}
-            <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium hover:underline">
-              Faça Login
+          <div className="mt-4 text-center text-sm">
+            <span className="text-slate-500">Já tem conta? </span>
+            <Link to="/login" className="text-primary hover:underline">
+              Fazer login
             </Link>
-          </p>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
-  );
+  )
 }
