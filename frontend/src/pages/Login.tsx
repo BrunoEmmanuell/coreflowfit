@@ -15,10 +15,12 @@ const Login: React.FC = () => {
     setLoading(true);
     
     try {
+      // O endpoint espera Form-Data (padrão OAuth2 do FastAPI)
       const formData = new URLSearchParams();
       formData.append('username', username);
       formData.append('password', password);
 
+      // Chamamos /auth/login (o api.ts já adiciona o /api/v1 antes)
       const response = await api.post("/auth/login", formData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
@@ -27,11 +29,11 @@ const Login: React.FC = () => {
       localStorage.setItem("token", access_token);
       localStorage.setItem("user", JSON.stringify({ username }));
       
-      // Redireciona forçando reload para garantir o header do axios
+      // Força recarregamento para aplicar o token
       window.location.href = "/";
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Falha no login. Verifique suas credenciais.");
+      setError("Usuário ou senha incorretos.");
       setLoading(false);
     }
   };
@@ -40,7 +42,7 @@ const Login: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
       <div className="max-w-md w-full bg-slate-800 rounded-xl shadow-2xl p-8 border border-slate-700">
         <h1 className="text-3xl font-bold text-white text-center mb-2">CoreFlowFit 🏋️‍♂️</h1>
-        <p className="text-slate-400 text-center mb-8">Área do Instrutor</p>
+        <p className="text-slate-400 text-center mb-8">Login do Instrutor</p>
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-6 text-center text-sm">

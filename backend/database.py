@@ -1,16 +1,15 @@
 # backend/database.py
-
 from dotenv import load_dotenv
 import pathlib
-load_dotenv(dotenv_path=str(pathlib.Path(__file__).resolve().parent / ".env"))
 import os
 import time
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from typing import Generator
-
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy.engine import Connection
+
+# Carrega variáveis de ambiente
+load_dotenv(dotenv_path=str(pathlib.Path(__file__).resolve().parent / ".env"))
 
 # ====================================================
 # DATABASE URL
@@ -21,6 +20,11 @@ if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL não definida em .env")
 
 def ensure_sslmode(url: str) -> str:
+    # CORREÇÃO: Se estiver em desenvolvimento, NÃO força SSL
+    if os.getenv("ENVIRONMENT") == "development":
+        return url
+
+    # Para produção (Railway/Render), força SSL
     if url.startswith("postgres://") or url.startswith("postgresql://"):
         parsed = urlparse(url)
         q = parse_qs(parsed.query)
@@ -61,20 +65,14 @@ else:
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # ====================================================
-# BASE DECLARATIVA (Compartilhada)
+# BASE DECLARATIVA
 # ====================================================
 Base = declarative_base()
 
 # ====================================================
-# EXECUTE QUERY (helper para queries manuais)
+# EXECUTE QUERY (helper)
 # ====================================================
 def execute_query(query: str, params: dict | None = None, *, fetch: bool = True):
-    """
-    Executa SQL simples.
-    - query: SQL string (use :param placeholders)
-    - params: dict de parâmetros
-    - fetch: se True, tenta retornar linhas; caso contrário retorna rowcount
-    """
     params = params or {}
     with engine.connect() as conn:
         result = conn.execute(text(query), params)
@@ -87,13 +85,9 @@ def execute_query(query: str, params: dict | None = None, *, fetch: bool = True)
         return {"rowcount": result.rowcount}
 
 # ====================================================
-# DEPENDENCIES: Session e Connection
+# DEPENDENCIES
 # ====================================================
 def get_db() -> Generator:
-    """
-    Dependency do FastAPI que fornece uma Session ORM (SessionLocal).
-    Use em endpoints como: def endpoint(db: Session = Depends(get_db))
-    """
     db = SessionLocal()
     try:
         yield db
@@ -101,9 +95,6 @@ def get_db() -> Generator:
         db.close()
 
 def get_db_conn() -> Generator:
-    """
-    Dependency do FastAPI que fornece uma Connection (SQLAlchemy Connection).
-    """
     conn = engine.connect()
     try:
         yield conn

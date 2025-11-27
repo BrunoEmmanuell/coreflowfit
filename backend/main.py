@@ -22,6 +22,8 @@ from backend.routers import (
     treinos
 )
 from backend.security_config import limiter
+from backend.database import engine, Base  # <--- IMPORTANTE: Engine e Base para criar tabelas
+from backend import models # <--- IMPORTANTE: Importar models para registrar as tabelas no Base
 
 # --- Configuração de Security Headers ---
 # 1. Definindo as políticas
@@ -37,7 +39,6 @@ referrer = ReferrerPolicy().strict_origin_when_cross_origin()
 xfo = XFrameOptions().deny()
 
 # 2. Instanciando o Secure com as políticas
-# Nota: X-Content-Type-Options: nosniff é padrão, e X-XSS-Protection foi removido (deprecated)
 secure_headers = Secure(
     csp=csp,
     hsts=hsts,
@@ -46,6 +47,14 @@ secure_headers = Secure(
 )
 
 app = FastAPI(title="CoreFlowFit API")
+
+# --- MÁGICA: CRIA AS TABELAS AO INICIAR ---
+@app.on_event("startup")
+def startup():
+    # Cria todas as tabelas definidas no models.py se elas não existirem
+    print("🔄 Verificando/Criando tabelas no banco de dados...")
+    Base.metadata.create_all(bind=engine)
+    print("✅ Tabelas verificadas/criadas com sucesso!")
 
 # --- Rate Limiting ---
 app.state.limiter = limiter
@@ -64,7 +73,8 @@ app.add_middleware(
 @app.middleware("http")
 async def set_secure_headers(request: Request, call_next):
     response = await call_next(request)
-    secure_headers.set_headers(response)  # <--- REMOVA O 'await'
+    # CORREÇÃO: secure_headers.set_headers não é assíncrono, removemos o 'await'
+    secure_headers.set_headers(response)
     return response
 
 # --- Rotas ---
