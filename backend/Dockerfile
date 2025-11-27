@@ -1,9 +1,10 @@
 # backend/Dockerfile
-FROM python:3.11-slim as builder
+
+# Estágio de Build (Usando versão estável - bookworm)
+FROM python:3.11-slim-bookworm as builder
 
 WORKDIR /app
 
-# Variáveis para otimização do Python
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -19,8 +20,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# --- Estágio Final (Imagem Leve) ---
-FROM python:3.11-slim
+# --- Estágio Final (Produção) ---
+FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
@@ -28,18 +29,17 @@ WORKDIR /app
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Instala bibliotecas do sistema necessárias para o PostgreSQL
-RUN apt-get update && apt-get install -y --no-install-recommends libpq-5 && \
+# CORREÇÃO AQUI: Mudamos de libpq-5 para libpq5
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 && \
     rm -rf /var/lib/apt/lists/*
 
 # Copia o código fonte
 COPY . /app/backend
 
-# Cria usuário de segurança (não rodar como root)
+# Cria usuário de segurança
 RUN useradd -m appuser
 USER appuser
 
 EXPOSE 8000
 
-# Comando para iniciar a API
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

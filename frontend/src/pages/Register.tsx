@@ -10,7 +10,7 @@ export default function Register() {
   const [senha, setSenha] = useState("");
   
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
