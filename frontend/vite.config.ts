@@ -1,8 +1,18 @@
+// vite.config.ts
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 
-export default defineConfig({
-  plugins: [react()],
-  server: { port: 5173 },
-  preview: { port: 5174 }
+export default defineConfig(async () => {
+  const react = (await import('@vitejs/plugin-react')).default
+
+  return {
+    plugins: [react()],
+    resolve: {
+      alias: {
+        '@': '/src'
+      }
+    },
+    server: {
+      port: 5173
+    }
+  }
 })
