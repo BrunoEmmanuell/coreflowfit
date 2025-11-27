@@ -3,7 +3,6 @@
 from dotenv import load_dotenv
 import pathlib
 load_dotenv(dotenv_path=str(pathlib.Path(__file__).resolve().parent / ".env"))
-
 import os
 import time
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode

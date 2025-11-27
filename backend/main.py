@@ -64,7 +64,7 @@ app.add_middleware(
 @app.middleware("http")
 async def set_secure_headers(request: Request, call_next):
     response = await call_next(request)
-    await secure_headers.set_headers(response)
+    secure_headers.set_headers(response)  # <--- REMOVA O 'await'
     return response
 
 # --- Rotas ---

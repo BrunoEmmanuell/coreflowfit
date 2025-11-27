@@ -665,7 +665,54 @@ def gerar_treino_ia_seguro(
     divisao_preferida: Optional[str] = "auto",
     aluno_id: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Versão melhorada e mais segura da geração de treinos"""
+    """Gera um plano de treino personalizado e seguro utilizando inteligência artificial.
+
+    Esta função atua como o orquestrador principal do módulo de IA. Ela processa
+    os dados do aluno, carrega a base de exercícios, aplica regras de segurança 
+    baseadas em lesões e comorbidades (ex: evitar impacto para quem tem artrose), 
+    seleciona a melhor divisão de treino (Split) e monta o cronograma semanal.
+
+    Args:
+        objetivo (Optional[str]): O objetivo principal do aluno (ex: 'hipertrofia', 
+            'emagrecimento', 'forca'). Obrigatório para a geração.
+        nivel_atividade (Optional[str]): Nível de experiência do aluno na musculação
+            (ex: 'iniciante', 'intermediario', 'avancado'). Obrigatório.
+        sexo (Optional[str]): Sexo biológico ('masculino' ou 'feminino'), utilizado 
+            para ajustes de volume, seleção de splits e prioridades musculares. Obrigatório.
+        idade (Optional[int]): Idade do aluno. Fator crítico para ajustes de segurança 
+            (ex: redução de volume e carga para idosos) e exclusão de exercícios de risco.
+        peso (Optional[float]): Peso corporal atual em kg.
+        altura (Optional[float]): Altura em metros.
+        lesoes (Optional[List[str]]): Lista de lesões pré-existentes (ex: 'ombro', 'joelho').
+            Usado para filtrar exercícios contraindicados. Defaults to None.
+        comorbidades (Optional[List[str]]): Lista de condições de saúde (ex: 'hipertensao', 
+            'hernia'). Defaults to None.
+        divisao_preferida (Optional[str]): Preferência de divisão de treino (ex: 'abc', 
+            'fullbody'). Se definido como 'auto', o algoritmo decide a melhor opção. 
+            Defaults to "auto".
+        aluno_id (Optional[str]): Identificador único do aluno para fins de log e 
+            rastreabilidade. Defaults to None.
+
+    Returns:
+        Dict[str, Any]: Um dicionário contendo o resultado da operação.
+        
+        Em caso de sucesso (ok=True):
+            {
+                "ok": True,
+                "objetivo": str,
+                "nivel": str,
+                "plano": List[Dict],  # Lista detalhada dos dias de treino e exercícios
+                "meta": Dict,         # Metadados sobre as decisões tomadas (split usado, etc)
+                "gerado_em": str      # Data e hora da geração (ISO format)
+            }
+
+        Em caso de erro (ok=False):
+            {
+                "ok": False,
+                "erro": str,          # Descrição do motivo da falha
+                "gerado_em": str
+            }
+    """
     
     # Validações iniciais
     if not objetivo or not nivel_atividade or not sexo:
@@ -721,6 +768,5 @@ def gerar_treino_ia_seguro(
             "erro": f"Erro interno: {str(e)}",
             "gerado_em": datetime.utcnow().isoformat() + "Z"
         }
-
 # Alias para compatibilidade
 gerar_treino_ia = gerar_treino_ia_seguro
