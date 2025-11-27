@@ -1,0 +1,17 @@
+{
+  "idade": 0.0,
+  "peso": 0.0,
+  "altura": 0.0,
+  "imc": 0.0,
+  "sexo_m": 0.0,
+  "sexo_f": 0.0,
+  "lesoes_count": 0.0,
+  "comorbidades_count": 0.0,
+  "n_days": 0.0,
+  "total_exs": 0.0,
+  "lower_count": 0.0,
+  "lower_ratio": 0.0,
+  "has_biset": 0.0,
+  "has_triset": 0.0,
+  "has_drop": 0.0
+}

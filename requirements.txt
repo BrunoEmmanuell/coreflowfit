@@ -1,0 +1,30 @@
+# --- Core API & Servidor ---
+fastapi
+uvicorn[standard]
+pydantic[email]
+sqlalchemy
+psycopg2-binary
+python-dotenv
+python-multipart
+secure              # <--- Importante para os headers
+slowapi             # <--- Importante para o rate limit
+passlib[bcrypt]
+python-jose[cryptography]
+
+# --- Banco de Dados ---
+sqlalchemy
+psycopg2-binary       # Driver PostgreSQL
+
+# --- Segurança & Autenticação ---
+passlib[bcrypt]       # Hash de senhas
+python-jose[cryptography] # Geração de JWT
+secure                # Headers de segurança (HSTS, CSP, etc) - Adicionado na tarefa anterior
+slowapi               # Rate Limiting - Adicionado na tarefa anterior
+
+# --- Data Science & Machine Learning (IA) ---
+numpy
+pandas
+scikit-learn          # Para LabelEncoder e GroupKFold
+joblib                # Para salvar o modelo
+lightgbm              # Algoritmo de ML usado
+optuna                # Para otimização de hiperparâmetros

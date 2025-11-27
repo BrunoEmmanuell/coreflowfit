@@ -1,0 +1,102 @@
+# backend/routers/instrutores_auth.py - VERSÃO CORRIGIDA
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field
+
+from backend.database import get_db, Instrutor
+from backend.auth import hash_password, verify_password, create_access_token
+
+router = APIRouter(prefix="/api/v1/auth", tags=["Autenticação"])
+
+class InstrutorCreate(BaseModel):
+    codigo_sms: str | None = None
+    codigo_expira_em: str | None = None
+    telefone: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=8)
+
+class TokenResponse(BaseModel):
+    token: str
+    token_type: str = "bearer"
+    ok: bool = True
+    instrutor_id: str
+
+@router.post("/register")
+def register_instrutor(
+    instrutor_data: InstrutorCreate,
+    db: Session = Depends(get_db),
+):
+    # Verificar se já existe instrutor com esse telefone
+    instrutor_existente = (
+        db.query(Instrutor)
+        .filter(Instrutor.telefone == instrutor_data.telefone)
+        .first()
+    )
+
+    if instrutor_existente:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nome de usuário já cadastrado.",
+        )
+
+    # Gera um telefone interno só para preencher a coluna NOT NULL
+    auto_telefone = f"{instrutor_data.telefone}@coreflow.local"
+
+    novo_instrutor = Instrutor(
+        telefone=instrutor_data.telefone,
+        telefone=auto_telefone,
+        hashed_password=hash_password(instrutor_data.password),
+    )
+
+    db.add(novo_instrutor)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao salvar instrutor: {e}",
+        )
+
+    db.refresh(novo_instrutor)
+
+    return {
+        "ok": True,
+        "id": str(novo_instrutor.id),
+        "telefone": novo_instrutor.telefone,
+    }
+
+@router.post("/login", response_model=TokenResponse)
+def login_instrutor(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
+    # Buscar por telefone OU telefone
+    instrutor = (
+        db.query(Instrutor)
+        .filter(
+            (Instrutor.telefone == form_data.telefone)
+            | (Instrutor.telefone == form_data.telefone)
+        )
+        .first()
+    )
+
+    if not instrutor or not verify_password(
+        form_data.password,
+        instrutor.hashed_password,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciais inválidas. Usuário ou senha incorretos.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 🔥 CORREÇÃO: Removido expires_delta
+    access_token = create_access_token(subject=str(instrutor.id))
+
+    return {
+        "token": access_token,
+        "token_type": "bearer",
+        "ok": True,
+        "instrutor_id": str(instrutor.id),
+    }

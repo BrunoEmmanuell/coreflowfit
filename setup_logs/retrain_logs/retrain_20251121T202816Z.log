@@ -1,0 +1,19 @@
+2025-11-21 17:28:16,244 INFO Starting retrain_perfeito.py with args: Namespace(dataset='backend/prepared_training_data_new.csv', model_out='models/feedback_predictor_20251121T202816Z.joblib', no_db=False, model_type='rf', test_size=0.2)
+2025-11-21 17:28:16,245 INFO Lendo dataset: backend\prepared_training_data_new.csv
+2025-11-21 17:28:16,297 INFO Dataset shape: (1000, 14)
+2025-11-21 17:28:16,298 INFO Target column detected: quality_label
+2025-11-21 17:28:16,550 INFO Prepared X shape: (1000, 55), y shape: (1000,), classes=[0]
+2025-11-21 17:28:17,225 INFO Classification report:
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00       200
+
+    accuracy                           1.00       200
+   macro avg       1.00      1.00      1.00       200
+weighted avg       1.00      1.00      1.00       200
+
+2025-11-21 17:28:17,226 INFO Training finished. Metrics: {'accuracy': 1.0}
+2025-11-21 17:28:17,293 INFO Modelo salvo em: models\feedback_predictor_20251121T202816Z.joblib
+2025-11-21 17:28:17,294 INFO Registering model in DB...
+2025-11-21 17:28:17,294 WARNING execute_query não disponível; pulando registro no DB.
+2025-11-21 17:28:17,294 INFO Retrain completo. Modelo salvo em: models\feedback_predictor_20251121T202816Z.joblib

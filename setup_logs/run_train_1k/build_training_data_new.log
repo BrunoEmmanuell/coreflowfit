@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\build_training_data.py", line 138, in <module>
+    parser=argparse.ArgumentParser(); parser.add_argument("--count",type=int,default=DEFAULT_COUNT); parser.add_argument("--exjson",type=str,default=DEFAULT_EX_JSON); parser.add_argument("--out_csv",type=str,default=OUT_CSV); parser.add_argument("--out_jsonl",type=str,default=OUT_JSONL); args=parser.parse_args(); generate(count=args.count,exjson=args.exjson,out_csv=args.out_csv,out_jsonl=args.out_jsonl)
+                                                                                                                                                                                                                                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\build_training_data.py", line 128, in generate
+    rows=[]; fh=open(out_jsonl,"w",encoding="utf-8")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/mnt/data/prepared_training_data_new.jsonl'

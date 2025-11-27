@@ -1,0 +1,47 @@
+2025-11-21 14:56:20,924 WARNING Não foi possível localizar coreflowfit.backend.db.schema — as tabelas não serão criadas automaticamente.
+2025-11-21 14:56:20,924 INFO Inserindo dados de teste no banco...
+2025-11-21 14:56:20,924 INFO CoreFlowFit: criando pool com DSN (provided)
+2025-11-21 14:56:23,288 INFO Postgres pool criado (min=1, max=10)
+2025-11-21 14:56:25,277 INFO Criando coluna faltante: ia_feature_store.aluno_id UUID
+2025-11-21 14:56:26,270 ERROR Erro ao executar query
+Traceback (most recent call last):
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\database.py", line 102, in execute_query
+    cur.execute(query, params or ())
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "ia_feature_store" does not exist
+
+2025-11-21 14:56:26,270 ERROR Falha ao inserir dados de teste: relation "ia_feature_store" does not exist
+Traceback (most recent call last):
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 207, in main
+    ensure_tables_ready()
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 57, in ensure_tables_ready
+    ensure_columns("ia_feature_store", {
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 46, in ensure_columns
+    execute_query(alter)
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\database.py", line 102, in execute_query
+    cur.execute(query, params or ())
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "ia_feature_store" does not exist
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 216, in <module>
+    main()
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 207, in main
+    ensure_tables_ready()
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 57, in ensure_tables_ready
+    ensure_columns("ia_feature_store", {
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 46, in ensure_columns
+    execute_query(alter)
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\database.py", line 102, in execute_query
+    cur.execute(query, params or ())
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "ia_feature_store" does not exist
+

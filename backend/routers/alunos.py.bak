@@ -1,0 +1,198 @@
+from fastapi import APIRouter, HTTPException, status, Query
+from pydantic import BaseModel, Field, validator
+from typing import Optional, List
+import uuid
+import re
+from backend.database import execute_query
+from backend.dependencies import TrainerId 
+
+router = APIRouter(prefix="/alunos", tags=["alunos"])
+
+class AlunoCompletoCreate(BaseModel):
+    nome: str = Field(..., min_length=2, max_length=100, description="Nome completo do aluno")
+    idade: Optional[str] = Field(None, regex=r'^\d+$', description="Idade em anos")
+    sexo: str = Field("Masculino", regex="^(Masculino|Feminino)$")
+    objetivo: str = Field("Hipertrofia", regex="^(Hipertrofia|Emagrecimento|Força|Resistência)$")
+    nivel: str = Field("Iniciante", regex="^(Iniciante|Intermediario|Avancado)$")
+    divisao: str = Field("Auto", description="Divisão de treino")
+    observacoes: Optional[str] = None
+    peso_kg: Optional[float] = Field(None, ge=30, le=300, description="Peso em kg (30-300)")
+    altura_m: Optional[float] = Field(None, ge=1.0, le=2.5, description="Altura em metros (1.0-2.5)")
+    ombros: Optional[float] = None
+    peito: Optional[float] = None
+    cintura: Optional[float] = None
+    quadril: Optional[float] = None
+    braco_direito: Optional[float] = None
+    braco_esquerdo: Optional[float] = None
+    coxa_direita: Optional[float] = None
+    coxa_esquerda: Optional[float] = None
+    panturrilha_direita: Optional[float] = None
+    panturrilha_esquerda: Optional[float] = None
+    hipertensao: bool = False
+    diabetes: bool = False
+    cardiopatia: bool = False
+    fuma: bool = False
+    lesoes: Optional[str] = None
+    medicacao: Optional[str] = None
+
+    @validator('nome')
+    def nome_valido(cls, v):
+        if not re.match(r'^[a-zA-ZÀ-ÿ\s]{2,100}$', v):
+            raise ValueError('Nome deve conter apenas letras e espaços (2-100 caracteres)')
+        return v.title()
+
+@router.get("/", status_code=status.HTTP_200_OK)
+def listar_alunos(instrutor_id: TrainerId):
+    try:
+        query = """
+            SELECT 
+                a.id, a.nome, a.objetivo, a.nivel_experiencia, a.sexo, a.criado_em,
+                m.peso_kg, m.altura_m
+            FROM alunos a
+            LEFT JOIN LATERAL (
+                SELECT peso_kg, altura_m 
+                FROM medidas_corpo 
+                WHERE aluno_id = a.id 
+                ORDER BY data_medida DESC 
+                LIMIT 1
+            ) m ON true
+            WHERE a.instrutor_id = %s 
+            ORDER BY a.criado_em DESC
+        """
+        rows = execute_query(query, (instrutor_id,), fetchall=True)
+        
+        alunos = [dict(row) for row in rows]
+        return {"ok": True, "alunos": alunos}
+        
+    except Exception as e:
+        print(f"Erro listar: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{aluno_id}", status_code=status.HTTP_200_OK)
+def obter_aluno_detalhado(aluno_id: str, instrutor_id: TrainerId):
+    try:
+        query = """
+            SELECT 
+                a.*,
+                s.hipertensao, s.diabetes, s.cardiopatia, s.fuma, s.lesoes, s.medicacao,
+                m.peso_kg, m.altura_m, m.imc,
+                m.ombros, m.peito, m.cintura, m.quadril,
+                m.braco_direito, m.braco_esquerdo,
+                m.coxa_direita, m.coxa_esquerda,
+                m.panturrilha_direita, m.panturrilha_esquerda,
+                COUNT(t.id) as total_treinos,
+                MAX(t.gerado_em) as ultimo_treino
+            FROM alunos a
+            LEFT JOIN saude_aluno s ON a.id = s.aluno_id
+            LEFT JOIN LATERAL (
+                SELECT * FROM medidas_corpo 
+                WHERE aluno_id = a.id 
+                ORDER BY data_medida DESC 
+                LIMIT 1
+            ) m ON true
+            LEFT JOIN treinos_gerados t ON t.aluno_id = a.id
+            WHERE a.id = %s AND a.instrutor_id = %s
+            GROUP BY a.id, s.id, m.peso_kg, m.altura_m, m.imc,
+                     m.ombros, m.peito, m.cintura, m.quadril,
+                     m.braco_direito, m.braco_esquerdo,
+                     m.coxa_direita, m.coxa_esquerda,
+                     m.panturrilha_direita, m.panturrilha_esquerda
+        """
+        row = execute_query(query, (aluno_id, instrutor_id), fetchone=True)
+        
+        if not row:
+            raise HTTPException(status_code=404, detail="Aluno não encontrado")
+            
+        return {"ok": True, "aluno": dict(row)}
+        
+    except Exception as e:
+        print(f"Erro ao buscar aluno: {e}")
+        raise HTTPException(status_code=500, detail="Erro interno")
+
+@router.get("/{aluno_id}/treinos", status_code=status.HTTP_200_OK)
+def listar_treinos_aluno(
+    aluno_id: str, 
+    instrutor_id: TrainerId,
+    page: int = Query(1, ge=1, description="Página"),
+    limit: int = Query(10, ge=1, le=50, description="Itens por página")
+):
+    try:
+        # Verificar se aluno pertence ao instrutor
+        check_query = "SELECT id FROM alunos WHERE id = %s AND instrutor_id = %s"
+        if not execute_query(check_query, (aluno_id, instrutor_id), fetchone=True):
+            raise HTTPException(status_code=404, detail="Aluno não encontrado")
+            
+        query = """
+            SELECT id, gerado_em, conteudo_json->'meta' as meta_info
+            FROM treinos_gerados 
+            WHERE aluno_id = %s 
+            ORDER BY gerado_em DESC
+            LIMIT %s OFFSET %s
+        """
+        offset = (page - 1) * limit
+        rows = execute_query(query, (aluno_id, limit, offset), fetchall=True)
+        treinos = [dict(row) for row in rows]
+
+        # Conta total de treinos para paginação
+        count_query = "SELECT COUNT(*) as total FROM treinos_gerados WHERE aluno_id = %s"
+        total_result = execute_query(count_query, (aluno_id,), fetchone=True)
+        total_treinos = total_result['total'] if total_result else 0
+
+        return {
+            "ok": True,
+            "treinos": treinos,
+            "paginacao": {
+                "pagina_atual": page,
+                "itens_por_pagina": limit,
+                "total_itens": total_treinos,
+                "total_paginas": (total_treinos + limit - 1) // limit
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Erro ao listar treinos: {e}")
+        raise HTTPException(status_code=500, detail="Erro interno")
+
+@router.post("/completo", status_code=status.HTTP_201_CREATED)
+def criar_aluno_completo(payload: AlunoCompletoCreate, instrutor_id: TrainerId):
+    novo_aluno_id = str(uuid.uuid4())
+    obs = payload.observacoes or ""
+    if payload.idade: obs += f" | Idade: {payload.idade}"
+
+    try:
+        # 1. Aluno
+        execute_query("""
+            INSERT INTO alunos (id, instrutor_id, nome, sexo, objetivo, nivel_experiencia, observacoes, criado_em)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+        """, (novo_aluno_id, instrutor_id, payload.nome, payload.sexo, payload.objetivo, payload.nivel, obs), fetchone=False)
+        
+        # 2. Medidas
+        execute_query("""
+            INSERT INTO medidas_corpo (
+                aluno_id, peso_kg, altura_m, ombros, peito, cintura, quadril,
+                braco_direito, braco_esquerdo, coxa_direita, coxa_esquerda,
+                panturrilha_direita, panturrilha_esquerda, data_medida, criado_em
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
+        """, (
+            novo_aluno_id, payload.peso_kg, payload.altura_m,
+            payload.ombros, payload.peito, payload.cintura, payload.quadril,
+            payload.braco_direito, payload.braco_esquerdo,
+            payload.coxa_direita, payload.coxa_esquerda,
+            payload.panturrilha_direita, payload.panturrilha_esquerda
+        ), fetchone=False)
+
+        # 3. Saúde
+        execute_query("""
+            INSERT INTO saude_aluno (aluno_id, hipertensao, diabetes, cardiopatia, fuma, lesoes, medicacao, criado_em)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+        """, (novo_aluno_id, payload.hipertensao, payload.diabetes, payload.cardiopatia, payload.fuma, payload.lesoes, payload.medicacao), fetchone=False)
+
+        # 4. Ciclo
+        execute_query("INSERT INTO ciclos_treino (aluno_id, fase, data_inicio, semanas_planeadas, ativo) VALUES (%s, 'adaptacao', CURRENT_DATE, 4, TRUE)", (novo_aluno_id,), fetchone=False)
+
+        return {"ok": True, "id": novo_aluno_id}
+    except Exception as e:
+        print(f"Erro criação: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

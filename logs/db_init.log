@@ -1,0 +1,7 @@
+2025-11-20 14:24:07,348 WARNING Não foi possível localizar coreflowfit.backend.db.schema — as tabelas não serão criadas automaticamente.
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\database.py", line 48, in <module>
+    PG_POOL_MIN = int(os.getenv("PG_POOL_MIN", "1"))
+ValueError: invalid literal for int() with base 10: ''

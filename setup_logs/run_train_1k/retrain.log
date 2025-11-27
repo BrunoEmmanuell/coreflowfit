@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\retrain.py", line 19, in <module>
+    import pandas as pd
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\pandas\__init__.py", line 61, in <module>
+    from pandas.core.api import (
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\pandas\core\api.py", line 1, in <module>
+    from pandas._libs import (
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\pandas\_libs\__init__.py", line 18, in <module>
+    from pandas._libs.interval import Interval
+  File "pandas/_libs/interval.pyx", line 1, in init pandas._libs.interval
+  File "pandas/_libs/hashtable.pyx", line 1, in init pandas._libs.hashtable
+  File "pandas/_libs/missing.pyx", line 1, in init pandas._libs.missing
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\pandas\_libs\tslibs\__init__.py", line 40, in <module>
+    from pandas._libs.tslibs.conversion import localize_pydatetime
+  File "pandas/_libs/tslibs/conversion.pyx", line 1, in init pandas._libs.tslibs.conversion
+  File "pandas/_libs/tslibs/offsets.pyx", line 1, in init pandas._libs.tslibs.offsets
+  File "pandas/_libs/tslibs/timestamps.pyx", line 1, in init pandas._libs.tslibs.timestamps
+  File "pandas/_libs/tslibs/timedeltas.pyx", line 1, in init pandas._libs.tslibs.timedeltas
+  File "pandas/_libs/tslibs/timezones.pyx", line 24, in init pandas._libs.tslibs.timezones
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\dateutil\tz\__init__.py", line 2, in <module>
+    from .tz import *
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\dateutil\tz\tz.py", line 19, in <module>
+    import six
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 676, in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 579, in module_from_spec
+  File "<frozen importlib._bootstrap>", line 560, in _init_module_attrs
+  File "<frozen importlib._bootstrap>", line 392, in cached
+KeyboardInterrupt
+^C

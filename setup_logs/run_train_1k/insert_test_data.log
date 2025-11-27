@@ -1,0 +1,23 @@
+2025-11-21 16:36:45,506 WARNING Não foi possível localizar coreflowfit.backend.db.schema — as tabelas não serão criadas automaticamente.
+2025-11-21 16:36:45,509 INFO Inserindo dados de teste no banco...
+2025-11-21 16:36:45,509 INFO CoreFlowFit: criando pool com DSN (provided)
+2025-11-21 16:36:47,953 INFO Postgres pool criado (min=1, max=10)
+2025-11-21 16:36:58,929 INFO Usando aluno existente: ee5dcd41-651e-4670-b460-8e6bc7c905a7
+2025-11-21 16:36:58,929 INFO Inserindo 1000 exemplos de teste para aluno ee5dcd41-651e-4670-b460-8e6bc7c905a7...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 216, in <module>
+    main()
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 208, in main
+    insert_examples(args.count)
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\ia\insert_test_data.py", line 186, in insert_examples
+    execute_query(
+  File "C:\Users\Bruno\Desktop\coreflowfit\backend\database.py", line 102, in execute_query
+    cur.execute(query, params or ())
+  File "C:\Users\Bruno\Desktop\coreflowfit\venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bruno\AppData\Local\Programs\Python\Python311\Lib\encodings\utf_8.py", line 15, in decode
+KeyboardInterrupt
+^C
