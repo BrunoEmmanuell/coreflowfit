@@ -1,23 +1,13 @@
-﻿// src/components/layout/Layout.tsx
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+﻿import React, { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { Menu, Users, Home, BarChart, LogOut } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
-
-/**
- * Layout minimal, self-contained:
- * - Sidebar (desktop) / Drawer (mobile)
- * - Header with mobile menu button
- * - Main content container
- *
- * Colar este arquivo em src/components/layout/Layout.tsx
- * (Ã© autossuficiente; nÃ£o depende de outros componentes customizados)
- */
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const { logout, user } = useAuthContext()
+  const location = useLocation()
 
   return (
     <div className="min-h-screen bg-background text-slate-800">
@@ -37,21 +27,39 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             aria-label={collapsed ? 'Expandir menu' : 'Colapsar menu'}
             className="text-sm px-2 py-1 rounded hover:bg-slate-50"
           >
-            {collapsed ? 'Â»' : 'Â«'}
+            {collapsed ? '»' : '«'}
           </button>
         </div>
 
         <nav className="flex-1 px-2 py-4 space-y-1">
-          <NavItem to="/dashboard" label="Dashboard" icon={<Home className="w-5 h-5" />} collapsed={collapsed} />
-          <NavItem to="/alunos" label="Alunos" icon={<Users className="w-5 h-5" />} collapsed={collapsed} />
-          <NavItem to="/evolucao" label="EvoluÃ§Ã£o" icon={<BarChart className="w-5 h-5" />} collapsed={collapsed} />
+          <NavItem 
+            to="/dashboard" 
+            label="Dashboard" 
+            icon={<Home className="w-5 h-5" />} 
+            collapsed={collapsed} 
+            isActive={location.pathname === '/dashboard' || location.pathname === '/'} 
+          />
+          <NavItem 
+            to="/alunos" 
+            label="Alunos" 
+            icon={<Users className="w-5 h-5" />} 
+            collapsed={collapsed} 
+            isActive={location.pathname.startsWith('/alunos') || location.pathname.startsWith('/aluno')} 
+          />
+          <NavItem 
+            to="/evolucao" 
+            label="Evolução" 
+            icon={<BarChart className="w-5 h-5" />} 
+            collapsed={collapsed} 
+            isActive={location.pathname === '/evolucao'} 
+          />
         </nav>
 
         <div className="px-3 py-3 border-t">
           <div className="flex items-center gap-3">
             {!collapsed && (
-              <div>
-                <div className="text-sm font-medium truncate">{(user as any)?.nome ?? 'â€”'}</div>
+              <div className="overflow-hidden">
+                <div className="text-sm font-medium truncate">{(user as any)?.nome ?? (user as any)?.username ?? '—'}</div>
                 <div className="text-xs text-slate-500">Personal Trainer</div>
               </div>
             )}
@@ -89,7 +97,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Users className="w-5 h-5" /> Alunos
             </Link>
             <Link to="/evolucao" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-50">
-              <BarChart className="w-5 h-5" /> EvoluÃ§Ã£o
+              <BarChart className="w-5 h-5" /> Evolução
             </Link>
 
             <div className="border-t mt-3 pt-3">
@@ -102,7 +110,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Page content */}
-      <div className="md:pl-64">
+      <div className="md:pl-64 transition-all duration-200">
         {/* Header */}
         <header className="sticky top-0 z-10 bg-background border-b border-slate-100">
           <div className="mx-auto px-4 py-3 max-w-7xl flex items-center justify-between">
@@ -117,7 +125,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* placeholder para avatar / notificaÃ§Ãµes */}
               <div className="w-8 h-8 rounded-full bg-slate-200" />
             </div>
           </div>
@@ -129,12 +136,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function NavItem({ to, label, icon, collapsed }: { to: string; label: string; icon: React.ReactNode; collapsed?: boolean }) {
+function NavItem({ to, label, icon, collapsed, isActive }: { to: string; label: string; icon: React.ReactNode; collapsed?: boolean; isActive?: boolean }) {
   return (
-    <Link to={to} className="flex items-center gap-3 px-3 py-2 rounded-md mx-2 hover:bg-slate-50">
+    <Link to={to} className={`flex items-center gap-3 px-3 py-2 rounded-md mx-2 hover:bg-slate-50 ${isActive ? 'bg-slate-100 font-medium text-primary' : 'text-slate-700'}`}>
       <div className="flex-shrink-0">{icon}</div>
       {!collapsed && <div className="truncate">{label}</div>}
     </Link>
   )
 }
-
