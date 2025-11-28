@@ -1,3 +1,2 @@
-@'
-export { cn, default } from "./cn";
-'@ | Set-Content -Path .\src\utils\index.ts -Encoding utf8
+﻿export { cn } from "./cn";
+export { default } from "./cn";
