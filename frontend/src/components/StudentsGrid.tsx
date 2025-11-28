@@ -1,144 +1,91 @@
-// src/components/StudentsGrid.tsx
-import React from 'react'
-import { useId } from 'react'
-import { User, Play } from 'lucide-react'
+﻿import React from 'react'
+import { User, Eye, Dumbbell, MoreHorizontal } from 'lucide-react'
 
-export type Aluno = {
-  id: string
-  nome?: string
-  objetivo?: string
-  nivel?: string
-  peso?: number
-  altura?: number
-  fotoUrl?: string | null
-  [k: string]: any
+// Helper para cores das tags (Badges)
+const getTagColor = (tag: string) => {
+  const t = tag?.toLowerCase() || ''
+  if (t.includes('emagrecimento')) return 'bg-emerald-100 text-emerald-700 border-emerald-200'
+  if (t.includes('hipertrofia')) return 'bg-slate-100 text-slate-700 border-slate-200'
+  if (t.includes('ganho')) return 'bg-blue-100 text-blue-700 border-blue-200'
+  return 'bg-gray-100 text-gray-700 border-gray-200'
 }
 
-type Props = {
-  students: Aluno[]
-  loading?: boolean
-  onViewProfile?: (id: string) => void
-  onGenerateTreino?: (id: string) => void
-  onAddFirst?: () => void
+const getLevelColor = (level: string) => {
+  const l = level?.toLowerCase() || ''
+  if (l.includes('iniciante')) return 'bg-amber-50 text-amber-700 border-amber-200'
+  if (l.includes('intermediário')) return 'bg-purple-50 text-purple-700 border-purple-200'
+  return 'bg-slate-50 text-slate-700 border-slate-200'
 }
 
-/** pequenos utilitários */
-function imc(peso?: number, altura?: number) {
-  if (!peso || !altura) return null
-  const h = altura / 100
-  if (h === 0) return null
-  return +(peso / (h * h)).toFixed(1)
-}
-
-/** componente skeleton simples */
-function CardSkeleton({ keyIndex = 0 }: { keyIndex?: number }) {
-  return (
-    <div key={keyIndex} className="p-4 bg-white rounded-xl shadow-card flex flex-col gap-3 animate-pulse">
-      <div className="h-20 w-20 rounded-full bg-slate-200 mx-auto" />
-      <div className="h-4 w-3/5 bg-slate-200 mx-auto rounded" />
-      <div className="h-3 w-2/5 bg-slate-200 mx-auto rounded" />
-      <div className="h-4 w-full bg-slate-200 rounded mt-2" />
-      <div className="h-8 w-full bg-slate-200 rounded" />
+export default function StudentsGrid({ students, loading, onViewProfile, onGenerateTreino }: any) {
+  if (loading) return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+       {[1,2,3].map(i => <div key={i} className="h-64 bg-white rounded-2xl animate-pulse shadow-sm" />)}
     </div>
   )
-}
 
-export default function StudentsGrid({ students, loading = false, onViewProfile, onGenerateTreino, onAddFirst }: Props) {
-  const id = useId()
-
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <CardSkeleton key={`${id}-s-${i}`} keyIndex={i} />
-        ))}
-      </div>
-    )
-  }
-
-  if (!students || students.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="w-48 h-48 rounded-full bg-slate-100 flex items-center justify-center mb-6">
-          <User className="w-12 h-12 text-slate-400" />
-        </div>
-        <h3 className="text-lg font-semibold">Nenhum aluno ainda</h3>
-        <p className="text-sm text-slate-500 mb-4">Adicione seu primeiro aluno para começar a gerar treinos e acompanhar a evolução.</p>
-        <button
-          onClick={() => onAddFirst && onAddFirst()}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90"
-        >
-          Adicionar Primeiro Aluno
-        </button>
-      </div>
-    )
-  }
+  if (!students || students.length === 0) return <div className="p-8 text-center text-slate-500">Nenhum aluno encontrado.</div>
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {students.map((a) => {
-        const alunoNome = a.nome ?? '—'
-        const alunoObjetivo = a.objetivo ?? '—'
-        const alunoNivel = a.nivel ?? '—'
-        const peso = a.peso ?? undefined
-        const altura = a.altura ?? undefined
-        const imcValor = imc(peso, altura)
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+      {students.map((aluno: any) => (
+        <div key={aluno.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-100 transition-all group relative">
+          
+          <button className="absolute top-4 right-4 text-slate-300 hover:text-slate-600 transition-colors">
+            <MoreHorizontal size={20} />
+          </button>
 
-        return (
-          <div key={a.id} className="p-4 bg-white rounded-xl shadow-card flex flex-col justify-between">
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                {a.fotoUrl ? (
-                  // eslint-disable-next-line jsx-a11y/img-redundant-alt
-                  <img src={a.fotoUrl} alt={`Foto de ${alunoNome}`} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="text-slate-400">
-                    <User className="w-8 h-8" />
-                  </div>
-                )}
-              </div>
-
-              <div className="text-center">
-                <div className="text-lg font-semibold truncate">{alunoNome}</div>
-                <div className="text-sm text-slate-500">{alunoObjetivo} • {alunoNivel}</div>
-              </div>
-
-              <div className="w-full grid grid-cols-3 gap-2 text-center mt-2">
-                <div>
-                  <div className="text-xs text-slate-400">Peso</div>
-                  <div className="text-sm font-medium">{peso ?? '—'} kg</div>
-                </div>
-                <div>
-                  <div className="text-xs text-slate-400">Altura</div>
-                  <div className="text-sm font-medium">{altura ?? '—'} cm</div>
-                </div>
-                <div>
-                  <div className="text-xs text-slate-400">IMC</div>
-                  <div className="text-sm font-medium">{imcValor ?? '—'}</div>
-                </div>
-              </div>
+          {/* Header do Card */}
+          <div className="flex items-start gap-4 mb-6">
+            <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">
+              {aluno.foto ? (
+                <img src={aluno.foto} className="w-full h-full object-cover" alt={aluno.nome} />
+              ) : (
+                <User size={32} />
+              )}
             </div>
-
-            <div className="mt-4 flex items-center gap-2">
-              <button
-                onClick={() => onViewProfile && onViewProfile(a.id)}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-slate-100 hover:bg-slate-50"
-              >
-                Ver Perfil
-              </button>
-
-              <button
-                onClick={() => onGenerateTreino && onGenerateTreino(a.id)}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-white hover:bg-primary/90"
-                title="Gerar treino"
-              >
-                <Play className="w-4 h-4" />
-                <span className="hidden sm:inline">Gerar Treino</span>
-              </button>
+            <div>
+              <h3 className="font-bold text-slate-800 text-lg leading-tight mb-2">{aluno.nome}</h3>
+              <div className="flex flex-wrap gap-2">
+                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${getTagColor(aluno.objetivo || 'Hipertrofia')}`}>
+                  {aluno.objetivo || 'Hipertrofia'}
+                </span>
+                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${getLevelColor(aluno.nivel || 'Iniciante')}`}>
+                  {aluno.nivel || 'Iniciante'}
+                </span>
+              </div>
             </div>
           </div>
-        )
-      })}
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <div>
+              <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Peso</p>
+              <p className="font-bold text-slate-700 text-lg">{aluno.peso || '70'} <span className="text-xs font-normal text-slate-400">kg</span></p>
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Altura</p>
+              <p className="font-bold text-slate-700 text-lg">{aluno.altura || '170'} <span className="text-xs font-normal text-slate-400">cm</span></p>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            <button 
+              onClick={() => onViewProfile(aluno.id)}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
+            >
+              <Eye size={16} /> Ver Perfil
+            </button>
+            <button 
+              onClick={() => onGenerateTreino(aluno.id)}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 shadow-md shadow-blue-200 transition-all hover:-translate-y-0.5"
+            >
+              <Dumbbell size={16} /> Gerar Treino
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

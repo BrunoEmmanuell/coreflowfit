@@ -1,10 +1,7 @@
-﻿@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* temporary: usar cores diretas para evitar erro @apply */
 body {
-  background-color: #F9FAFB; /* gray-50 */
-  color: #1F2937;            /* gray-800 */
+  background-color: #F9FAFB;
+  color: #1F2937;
   font-family: Inter, system-ui, sans-serif;
 }

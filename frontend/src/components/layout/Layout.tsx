@@ -1,6 +1,6 @@
 ﻿import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, Users, Home, BarChart, LogOut } from 'lucide-react'
+import { Menu, Users, Home, BarChart, LogOut, Calendar, Settings, DollarSign, Dumbbell } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -10,137 +10,112 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
 
   return (
-    <div className="min-h-screen bg-background text-slate-800">
-      {/* Desktop sidebar */}
+    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-800">
+      {/* Sidebar Escura (Dark Mode) */}
       <aside
-        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 bg-surface border-r border-slate-100 z-20 transition-all duration-200 ${
-          collapsed ? 'w-16' : 'w-64'
+        className={`hidden md:flex flex-col fixed inset-y-0 z-20 transition-all duration-300 bg-[#0F172A] text-white ${
+          collapsed ? 'w-20' : 'w-72'
         }`}
-        aria-label="Sidebar"
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <div className={`flex items-center gap-3 ${collapsed ? 'justify-center w-full' : ''}`}>
-            <div className="text-primary font-bold">{!collapsed && 'CoreFlowFit'}</div>
+        {/* Logo Area */}
+        <div className="h-20 flex items-center px-6 border-b border-slate-800/50">
+          <div className="flex items-center gap-3">
+            {/* Ícone da Marca (Pequeno) */}
+            <svg className="w-8 h-8 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16.5 6C17.8807 6 19 4.88071 19 3.5C19 2.11929 17.8807 1 16.5 1C15.1193 1 14 2.11929 14 3.5C14 4.88071 15.1193 6 16.5 6Z" />
+              <path d="M12.5 7.5C10.85 7.5 9.6 7.9 8.6 8.5L3.5 11.2L4.8 13.6L8.5 11.6V17.5L5 22.5L7.5 24L11.5 18.5L14 21V24H16.5V19.5L13.5 16.5V11.5L16.5 14.5L18.8 12.8C18.8 12.8 17.5 8.5 16.5 8C15.5 7.5 13.5 7.5 12.5 7.5Z" />
+            </svg>
+            {!collapsed && <span className="font-bold text-xl tracking-tight">CoreFlowFit</span>}
           </div>
-          <button
-            onClick={() => setCollapsed((c) => !c)}
-            aria-label={collapsed ? 'Expandir menu' : 'Colapsar menu'}
-            className="text-sm px-2 py-1 rounded hover:bg-slate-50"
-          >
-            {collapsed ? '»' : '«'}
-          </button>
         </div>
 
-        <nav className="flex-1 px-2 py-4 space-y-1">
-          <NavItem 
-            to="/dashboard" 
-            label="Dashboard" 
-            icon={<Home className="w-5 h-5" />} 
-            collapsed={collapsed} 
-            isActive={location.pathname === '/dashboard' || location.pathname === '/'} 
-          />
-          <NavItem 
-            to="/alunos" 
-            label="Alunos" 
-            icon={<Users className="w-5 h-5" />} 
-            collapsed={collapsed} 
-            isActive={location.pathname.startsWith('/alunos') || location.pathname.startsWith('/aluno')} 
-          />
-          <NavItem 
-            to="/evolucao" 
-            label="Evolução" 
-            icon={<BarChart className="w-5 h-5" />} 
-            collapsed={collapsed} 
-            isActive={location.pathname === '/evolucao'} 
-          />
+        {/* Navegação */}
+        <nav className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
+          <p className={`px-4 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${collapsed ? 'hidden' : 'block'}`}>Menu Principal</p>
+          
+          <NavItem to="/" label="Dashboard" icon={<Home size={20} />} collapsed={collapsed} active={location.pathname === '/'} />
+          <NavItem to="/alunos" label="Meus Alunos" icon={<Users size={20} />} collapsed={collapsed} active={location.pathname.startsWith('/aluno')} />
+          <NavItem to="/treinos" label="Treinos" icon={<Dumbbell size={20} />} collapsed={collapsed} />
+          
+          <div className={`my-4 border-t border-slate-800 ${collapsed ? 'hidden' : 'block'}`}></div>
+          <p className={`px-4 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${collapsed ? 'hidden' : 'block'}`}>Gestão</p>
+          
+          <NavItem to="/calendario" label="Calendário" icon={<Calendar size={20} />} collapsed={collapsed} />
+          <NavItem to="/financeiro" label="Financeiro" icon={<DollarSign size={20} />} collapsed={collapsed} />
+          <NavItem to="/configuracoes" label="Configurações" icon={<Settings size={20} />} collapsed={collapsed} />
         </nav>
 
-        <div className="px-3 py-3 border-t">
-          <div className="flex items-center gap-3">
+        {/* Footer da Sidebar (User Profile) */}
+        <div className="p-4 border-t border-slate-800 bg-[#0F172A]">
+          <div className={`flex items-center gap-3 p-2 rounded-xl transition-colors hover:bg-slate-800/50 ${collapsed ? 'justify-center' : ''}`}>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-blue-900/20">
+              {(user as any)?.nome?.charAt(0) ?? 'U'}
+            </div>
             {!collapsed && (
-              <div className="overflow-hidden">
-                <div className="text-sm font-medium truncate">{(user as any)?.nome ?? (user as any)?.username ?? '—'}</div>
-                <div className="text-xs text-slate-500">Personal Trainer</div>
+              <div className="flex-1 overflow-hidden">
+                <p className="text-sm font-semibold truncate text-white">{(user as any)?.nome ?? 'Personal Trainer'}</p>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => logout()} className="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+                    <LogOut size={12} /> Sair
+                  </button>
+                </div>
               </div>
             )}
-            <div className="ml-auto">
-              <button onClick={() => logout()} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-50">
-                <LogOut className="w-4 h-4" />
-                {!collapsed && <span>Sair</span>}
-              </button>
-            </div>
           </div>
         </div>
       </aside>
 
-      {/* Mobile drawer */}
-      <div className={`md:hidden fixed inset-0 z-30 ${mobileOpen ? 'visible' : 'invisible pointer-events-none'}`}>
-        <div
-          className={`absolute inset-0 bg-black/40 transition-opacity ${mobileOpen ? 'opacity-100' : 'opacity-0'}`}
-          onClick={() => setMobileOpen(false)}
-        />
-        <aside
-          className={`absolute left-0 top-0 bottom-0 w-72 bg-surface shadow-xl overflow-auto transform transition-transform ${
-            mobileOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-        >
-          <div className="flex items-center justify-between px-4 py-3 border-b">
-            <div className="font-semibold">CoreFlowFit</div>
-            <button className="px-2 py-1" onClick={() => setMobileOpen(false)}>Fechar</button>
-          </div>
-
-          <nav className="p-4 space-y-2">
-            <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-50">
-              <Home className="w-5 h-5" /> Dashboard
-            </Link>
-            <Link to="/alunos" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-50">
-              <Users className="w-5 h-5" /> Alunos
-            </Link>
-            <Link to="/evolucao" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-50">
-              <BarChart className="w-5 h-5" /> Evolução
-            </Link>
-
-            <div className="border-t mt-3 pt-3">
-              <button className="w-full text-left px-3 py-2 rounded hover:bg-slate-50" onClick={() => { setMobileOpen(false); logout(); }}>
-                <LogOut className="w-4 h-4 inline mr-2" /> Sair
-              </button>
-            </div>
-          </nav>
-        </aside>
+      {/* Mobile Overlay */}
+      {mobileOpen && <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden transition-opacity" onClick={() => setMobileOpen(false)} />}
+      
+      {/* Mobile Drawer (Simplificado) */}
+      <div className={`fixed inset-y-0 left-0 w-64 bg-[#0F172A] z-40 transform transition-transform duration-300 md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+         <div className="h-16 flex items-center px-6 border-b border-slate-800">
+            <span className="font-bold text-xl text-white">CoreFlowFit</span>
+         </div>
+         <nav className="p-4 space-y-2">
+            <NavItem to="/" label="Dashboard" icon={<Home size={20} />} onClick={() => setMobileOpen(false)} />
+            <NavItem to="/alunos" label="Meus Alunos" icon={<Users size={20} />} onClick={() => setMobileOpen(false)} />
+            <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-3 text-slate-400 hover:text-white mt-4">
+              <LogOut size={20} /> Sair
+            </button>
+         </nav>
       </div>
 
-      {/* Page content */}
-      <div className="md:pl-64 transition-all duration-200">
-        {/* Header */}
-        <header className="sticky top-0 z-10 bg-background border-b border-slate-100">
-          <div className="mx-auto px-4 py-3 max-w-7xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="md:hidden">
-                <button onClick={() => setMobileOpen(true)} aria-label="Abrir menu" className="p-2 rounded hover:bg-slate-50">
-                  <Menu className="w-5 h-5" />
-                </button>
-              </div>
-
-              <h1 className="text-lg font-semibold">CoreFlowFit</h1>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-slate-200" />
-            </div>
-          </div>
+      {/* Main Content Area */}
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${collapsed ? 'md:pl-20' : 'md:pl-72'}`}>
+        {/* Mobile Header */}
+        <header className="md:hidden h-16 bg-white border-b border-slate-100 flex items-center px-4 justify-between sticky top-0 z-10 shadow-sm">
+          <span className="font-bold text-slate-800 flex items-center gap-2">
+             <div className="text-blue-600"></div> CoreFlowFit
+          </span>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 text-slate-600 hover:bg-slate-50 rounded-lg">
+            <Menu size={24} />
+          </button>
         </header>
 
-        <main className="mx-auto px-4 py-6 max-w-7xl">{children}</main>
+        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
+          {children}
+        </main>
       </div>
     </div>
   )
 }
 
-function NavItem({ to, label, icon, collapsed, isActive }: { to: string; label: string; icon: React.ReactNode; collapsed?: boolean; isActive?: boolean }) {
+function NavItem({ to, label, icon, collapsed, active, onClick }: any) {
   return (
-    <Link to={to} className={`flex items-center gap-3 px-3 py-2 rounded-md mx-2 hover:bg-slate-50 ${isActive ? 'bg-slate-100 font-medium text-primary' : 'text-slate-700'}`}>
-      <div className="flex-shrink-0">{icon}</div>
-      {!collapsed && <div className="truncate">{label}</div>}
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group relative overflow-hidden ${
+        active 
+          ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20' 
+          : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+      }`}
+    >
+      <div className={`transition-colors ${active ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>{icon}</div>
+      {!collapsed && <span className="font-medium text-sm">{label}</span>}
+      {active && !collapsed && <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white/20 rounded-l-full"></div>}
     </Link>
   )
 }

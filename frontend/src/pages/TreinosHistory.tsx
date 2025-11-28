@@ -1,4 +1,4 @@
-﻿/* src/pages/TreinosHistory.tsx — versão corrigida */
+﻿/* src/pages/TreinosHistory.tsx — versão corrigida (v5 isPending) */
 import React, { useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -191,7 +191,7 @@ export default function TreinosHistoryPage(): JSX.Element {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Button variant="secondary" size="sm" loading={duplicate.isLoading && (duplicate as any).variables === t.id} onClick={() => handleDuplicate(t.id)}>Duplicar</Button>
+                      <Button variant="secondary" size="sm" loading={duplicate.isPending && (duplicate as any).variables === t.id} onClick={() => handleDuplicate(t.id)}>Duplicar</Button>
                     </div>
                   </div>
                 </CardFooter>
