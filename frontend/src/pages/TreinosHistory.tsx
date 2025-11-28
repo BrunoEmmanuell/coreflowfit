@@ -73,7 +73,7 @@ export default function TreinosHistoryPage(): JSX.Element {
   }, [treinos, from, to, division])
 
   // mutation: duplicar / gerar novo treino baseado no existente
-  const duplicate = useMutation(
+  const duplicate = (useMutation as any)(
     async (baseTreinoId: string) => {
       // payload: tente enviar base_treino_id (backend pode suportar ou nÃ£o)
       // se nÃ£o suportar, fallback no servidor para gerar com aluno_id apenas
@@ -102,7 +102,7 @@ export default function TreinosHistoryPage(): JSX.Element {
 
   const handleDuplicate = (treinoId: string) => {
     if (!confirm('Duplicar este treino? SerÃ¡ gerado um novo treino baseado neste.')) return
-    duplicate.mutate(treinoId)
+    (duplicate as any).mutate(treinoId as any)
   }
 
   return (
@@ -198,7 +198,7 @@ export default function TreinosHistoryPage(): JSX.Element {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Button variant="secondary" size="sm" loading={duplicate.isLoading && duplicate.variables === t.id} onClick={() => handleDuplicate(t.id)}>Duplicar</Button>
+                      <Button variant="secondary" size="sm" loading={(duplicate as any).isLoading && (duplicate as any).variables === t.id} onClick={() => handleDuplicate(t.id)}>Duplicar</Button>
                     </div>
                   </div>
                 </CardFooter>
@@ -210,4 +210,6 @@ export default function TreinosHistoryPage(): JSX.Element {
     </Layout>
   )
 }
+
+
 

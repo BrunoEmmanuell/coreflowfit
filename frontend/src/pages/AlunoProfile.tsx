@@ -16,7 +16,7 @@ export default function AlunoProfile(){
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-3">{(aluno as any)?.nome || 'Aluno'}</h1>
       <div className="mb-4">
-        <button onClick={() => gerar.mutate({ aluno_id: Number(aluno_id) })} className="px-3 py-1 bg-yellow-500 rounded">Gerar treino IA</button>
+        <button onClick={() => (gerar as any).mutate({ aluno_id: Number(aluno_id as any) })} className="px-3 py-1 bg-yellow-500 rounded">Gerar treino IA</button>
       </div>
 
       <div>
@@ -28,4 +28,5 @@ export default function AlunoProfile(){
     </div>
   );
 }
+
 
