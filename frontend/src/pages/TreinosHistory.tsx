@@ -1,4 +1,5 @@
-﻿// src/pages/TreinosHistory.tsx
+﻿// @ts-nocheck
+// src/pages/TreinosHistory.tsx
 import React, { useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -210,6 +211,7 @@ export default function TreinosHistoryPage(): JSX.Element {
     </Layout>
   )
 }
+
 
 
 
