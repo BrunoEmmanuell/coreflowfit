@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+﻿import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '@/utils/cn'
 
@@ -123,7 +123,7 @@ export default function Modal({
       >
         <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
           {/* Header */}
-          {(title || onClose) && (
+          {(title || !!onClose) && (
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <div className="text-lg font-medium text-slate-800">{title}</div>
               <div>
@@ -132,7 +132,7 @@ export default function Modal({
                   className="p-2 rounded-md hover:bg-slate-100"
                   onClick={onClose}
                 >
-                  ✕
+                  âœ•
                 </button>
               </div>
             </div>
@@ -149,3 +149,4 @@ export default function Modal({
     document.body
   )
 }
+

@@ -1,4 +1,4 @@
-// src/components/layout/Layout.tsx
+﻿// src/components/layout/Layout.tsx
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, Users, Home, BarChart, LogOut } from 'lucide-react'
@@ -11,7 +11,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
  * - Main content container
  *
  * Colar este arquivo em src/components/layout/Layout.tsx
- * (é autossuficiente; não depende de outros componentes customizados)
+ * (Ã© autossuficiente; nÃ£o depende de outros componentes customizados)
  */
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -37,21 +37,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             aria-label={collapsed ? 'Expandir menu' : 'Colapsar menu'}
             className="text-sm px-2 py-1 rounded hover:bg-slate-50"
           >
-            {collapsed ? '»' : '«'}
+            {collapsed ? 'Â»' : 'Â«'}
           </button>
         </div>
 
         <nav className="flex-1 px-2 py-4 space-y-1">
           <NavItem to="/dashboard" label="Dashboard" icon={<Home className="w-5 h-5" />} collapsed={collapsed} />
           <NavItem to="/alunos" label="Alunos" icon={<Users className="w-5 h-5" />} collapsed={collapsed} />
-          <NavItem to="/evolucao" label="Evolução" icon={<BarChart className="w-5 h-5" />} collapsed={collapsed} />
+          <NavItem to="/evolucao" label="EvoluÃ§Ã£o" icon={<BarChart className="w-5 h-5" />} collapsed={collapsed} />
         </nav>
 
         <div className="px-3 py-3 border-t">
           <div className="flex items-center gap-3">
             {!collapsed && (
               <div>
-                <div className="text-sm font-medium truncate">{user?.nome ?? '—'}</div>
+                <div className="text-sm font-medium truncate">{(user as any)?.nome ?? 'â€”'}</div>
                 <div className="text-xs text-slate-500">Personal Trainer</div>
               </div>
             )}
@@ -89,7 +89,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Users className="w-5 h-5" /> Alunos
             </Link>
             <Link to="/evolucao" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-50">
-              <BarChart className="w-5 h-5" /> Evolução
+              <BarChart className="w-5 h-5" /> EvoluÃ§Ã£o
             </Link>
 
             <div className="border-t mt-3 pt-3">
@@ -117,7 +117,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* placeholder para avatar / notificações */}
+              {/* placeholder para avatar / notificaÃ§Ãµes */}
               <div className="w-8 h-8 rounded-full bg-slate-200" />
             </div>
           </div>
@@ -137,3 +137,4 @@ function NavItem({ to, label, icon, collapsed }: { to: string; label: string; ic
     </Link>
   )
 }
+

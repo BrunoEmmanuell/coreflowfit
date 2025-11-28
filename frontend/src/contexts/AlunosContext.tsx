@@ -1,4 +1,4 @@
-// src/contexts/AlunosContext.tsx
+﻿// src/contexts/AlunosContext.tsx
 import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -48,19 +48,19 @@ export function AlunosProvider({
   });
 
   // mutation para criar aluno; no onSuccess usamos o queryClient recebido como prop
-  const mutation = useMutation(criarAlunoApi, {
+  const mutation = useMutation<any, Error, any>(criarAlunoApi, {
     onSuccess: () => {
       try {
         if (queryClient) {
-          queryClient.invalidateQueries(['alunos']);
+          queryClient.invalidateQueries({ queryKey: ['alunos'] });
         } else if ((window as any).__REACT_QUERY_CLIENT) {
-          (window as any).__REACT_QUERY_CLIENT.invalidateQueries(['alunos']);
+          (window as any).__REACT_QUERY_CLIENT.invalidateQueries({ queryKey: ['alunos'] });
         }
       } catch (e) {
-        // não falhar a renderização por causa da invalidação
-        // só logamos o aviso
+        // nÃ£o falhar a renderizaÃ§Ã£o por causa da invalidaÃ§Ã£o
+        // sÃ³ logamos o aviso
         // eslint-disable-next-line no-console
-        console.warn('AlunosContext: não foi possível invalidar queries automaticamente', e);
+        console.warn('AlunosContext: nÃ£o foi possÃ­vel invalidar queries automaticamente', e);
       }
     },
   });
@@ -89,3 +89,4 @@ export function useAlunosContext() {
   if (!ctx) throw new Error('useAlunosContext must be used within AlunosProvider');
   return ctx;
 }
+

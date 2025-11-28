@@ -1,4 +1,4 @@
-// src/pages/TreinosHistory.tsx
+﻿// src/pages/TreinosHistory.tsx
 import React, { useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -45,7 +45,7 @@ export default function TreinosHistoryPage(): JSX.Element {
   const divisions = useMemo(() => {
     if (!treinos) return []
     const set = new Set<string>()
-    treinos.forEach((t) => {
+    (treinos as any[]).forEach((t) => {
       if (t.divisao) set.add(String(t.divisao))
     })
     return Array.from(set).map((d) => ({ value: d, label: d }))
@@ -54,7 +54,7 @@ export default function TreinosHistoryPage(): JSX.Element {
   // client-side filter
   const filtered = useMemo(() => {
     if (!treinos) return []
-    return treinos.filter((t) => {
+    return (treinos as any[]).filter((t) => {
       // division filter
       if (division && String(t.divisao) !== division) return false
       // date filter
@@ -75,8 +75,8 @@ export default function TreinosHistoryPage(): JSX.Element {
   // mutation: duplicar / gerar novo treino baseado no existente
   const duplicate = useMutation(
     async (baseTreinoId: string) => {
-      // payload: tente enviar base_treino_id (backend pode suportar ou não)
-      // se não suportar, fallback no servidor para gerar com aluno_id apenas
+      // payload: tente enviar base_treino_id (backend pode suportar ou nÃ£o)
+      // se nÃ£o suportar, fallback no servidor para gerar com aluno_id apenas
       const payload = { aluno_id: alunoId, base_treino_id: baseTreinoId }
       const { data } = await api.post('/api/v1/treinos/gerar', payload)
       return data
@@ -86,7 +86,7 @@ export default function TreinosHistoryPage(): JSX.Element {
         setApiError(null)
         setApiSuccess(null)
       },
-      onSuccess: (data) => {
+      onSuccess: (data:any) => {
         setApiSuccess('Treino duplicado/gerado com sucesso.')
         qc.invalidateQueries({ queryKey: ['treinos', alunoId] })
         // navegar para o novo treino se API retornar id
@@ -101,7 +101,7 @@ export default function TreinosHistoryPage(): JSX.Element {
   )
 
   const handleDuplicate = (treinoId: string) => {
-    if (!confirm('Duplicar este treino? Será gerado um novo treino baseado neste.')) return
+    if (!confirm('Duplicar este treino? SerÃ¡ gerado um novo treino baseado neste.')) return
     duplicate.mutate(treinoId)
   }
 
@@ -110,7 +110,7 @@ export default function TreinosHistoryPage(): JSX.Element {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Histórico de Treinos</h1>
+            <h1 className="text-2xl font-semibold">HistÃ³rico de Treinos</h1>
             <p className="text-sm text-slate-500">Filtre e veja treinos anteriores deste aluno</p>
           </div>
 
@@ -121,16 +121,16 @@ export default function TreinosHistoryPage(): JSX.Element {
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-xs text-slate-500">Até</label>
+              <label className="text-xs text-slate-500">AtÃ©</label>
               <Input type="date" value={to} onChange={(e) => setTo((e.target as HTMLInputElement).value)} />
             </div>
 
             <div className="w-56">
               <Select
-                options={[{ value: '', label: 'Todas as divisões' }, ...divisions]}
+                options={[{ value: '', label: 'Todas as divisÃµes' }, ...divisions]}
                 value={division ? { value: division, label: division } : null}
                 onChange={(opt) => setDivision(opt?.value ? String(opt.value) : null)}
-                placeholder="Filtrar por divisão"
+                placeholder="Filtrar por divisÃ£o"
                 searchable={false}
                 clearable
               />
@@ -145,13 +145,13 @@ export default function TreinosHistoryPage(): JSX.Element {
           <div className="py-12 flex items-center justify-center">
             <div className="flex flex-col items-center gap-3">
               <div className="w-12 h-12 border-4 border-slate-200 border-t-primary rounded-full animate-spin" />
-              <div className="text-sm text-slate-500">Carregando histórico...</div>
+              <div className="text-sm text-slate-500">Carregando histÃ³rico...</div>
             </div>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-16 flex flex-col items-center justify-center text-center gap-6">
             <div className="w-48 h-48 bg-gradient-to-br from-slate-100 to-slate-50 rounded-lg flex items-center justify-center">
-              {/* ilustração simples */}
+              {/* ilustraÃ§Ã£o simples */}
               <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="120" height="120" rx="12" fill="#fff" />
                 <path d="M30 88c4-10 12-18 24-18s20 8 24 18" stroke="#CBD5E1" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
@@ -174,20 +174,20 @@ export default function TreinosHistoryPage(): JSX.Element {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <div className="text-sm font-semibold">{t.titulo ?? `Treino ${t.id}`}</div>
-                      <div className="text-xs text-slate-500">{t.data ? new Date(t.data).toLocaleDateString() : '—'}</div>
+                      <div className="text-xs text-slate-500">{t.data ? new Date(t.data).toLocaleDateString() : 'â€”'}</div>
                     </div>
                     <div className="text-xs">
-                      <span className="inline-block px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs">{t.divisao ?? '—'}</span>
+                      <span className="inline-block px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs">{t.divisao ?? 'â€”'}</span>
                     </div>
                   </div>
                 </CardHeader>
 
                 <CardBody>
-                  <div className="text-sm text-slate-700 mb-2">{t.observacoes ?? 'Sem observações'}</div>
-                  {/* opções de resumo adicional se houver */}
+                  <div className="text-sm text-slate-700 mb-2">{t.observacoes ?? 'Sem observaÃ§Ãµes'}</div>
+                  {/* opÃ§Ãµes de resumo adicional se houver */}
                   <div className="text-xs text-slate-500">
-                    {/* por exemplo: número de exercícios, duração, etc (adapte caso seu backend retorne) */}
-                    {Array.isArray(t.dias) ? `${t.dias.length} dias • ${t.dias.reduce((acc:any, d:any) => acc + (d.exercicios?.length ?? 0), 0)} exercícios` : null}
+                    {/* por exemplo: nÃºmero de exercÃ­cios, duraÃ§Ã£o, etc (adapte caso seu backend retorne) */}
+                    {Array.isArray(t.dias) ? `${t.dias.length} dias â€¢ ${t.dias.reduce((acc:any, d:any) => acc + (d.exercicios?.length ?? 0), 0)} exercÃ­cios` : null}
                   </div>
                 </CardBody>
 
@@ -210,3 +210,4 @@ export default function TreinosHistoryPage(): JSX.Element {
     </Layout>
   )
 }
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/utils/cn'
 import Button from '@/components/ui/Button'
@@ -45,7 +45,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
 
           <div>
             <Button variant="ghost" size="sm" onClick={() => setCollapsed((c) => !c)} aria-label={collapsed ? 'Expandir menu' : 'Colapsar menu'}>
-              {collapsed ? '»' : '«'}
+              {collapsed ? 'Â»' : 'Â«'}
             </Button>
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
         <nav className="flex-1 px-1 py-4 space-y-1">
           <NavItem to="/dashboard" label="Dashboard" icon={<Home className="w-5 h-5" />} collapsed={collapsed} />
           <NavItem to="/dashboard" label="Alunos" icon={<Users className="w-5 h-5" />} collapsed={collapsed} />
-          <NavItem to="/evolucao" label="Evolução" icon={<BarChart className="w-5 h-5" />} collapsed={collapsed} />
+          <NavItem to="/evolucao" label="EvoluÃ§Ã£o" icon={<BarChart className="w-5 h-5" />} collapsed={collapsed} />
           {/* add more nav items */}
         </nav>
 
@@ -61,7 +61,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
           <div className={cn('flex items-center gap-3', collapsed ? 'flex-col' : '')}>
             {!collapsed && (
               <div>
-                <div className="text-sm font-medium">{user?.nome ?? '—'}</div>
+                <div className="text-sm font-medium">{(user as any)?.nome ?? 'â€”'}</div>
                 <div className="text-xs text-slate-500">Personal Trainer</div>
               </div>
             )}
@@ -90,7 +90,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
           <nav className="p-4 space-y-2">
             <NavLink onClick={onMobileClose} to="/dashboard" className={({isActive})=> cn('flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-50', isActive ? 'bg-slate-100' : '')}><Home className="w-5 h-5" /> Dashboard</NavLink>
             <NavLink onClick={onMobileClose} to="/alunos" className={({isActive})=> cn('flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-50', isActive ? 'bg-slate-100' : '')}><Users className="w-5 h-5" /> Alunos</NavLink>
-            <NavLink onClick={onMobileClose} to="/evolucao" className={({isActive})=> cn('flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-50', isActive ? 'bg-slate-100' : '')}><BarChart className="w-5 h-5" /> Evolução</NavLink>
+            <NavLink onClick={onMobileClose} to="/evolucao" className={({isActive})=> cn('flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-50', isActive ? 'bg-slate-100' : '')}><BarChart className="w-5 h-5" /> EvoluÃ§Ã£o</NavLink>
             <div className="border-t mt-3 pt-3">
               <Button variant="ghost" size="sm" onClick={() => { onMobileClose(); logout(); }}>Sair</Button>
             </div>
@@ -112,3 +112,4 @@ function NavItem({ to, label, icon, collapsed }: { to: string; label: string; ic
     </NavLink>
   )
 }
+
