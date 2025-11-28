@@ -13,8 +13,9 @@ export function useTreinosDoAluno(aluno_id?: number) {
 }
 
 export function useGerarTreino() {
-  return useMutation<any, Error, any>(async (payload: any) => {
+  return useMutation<any, Error, any>({ mutationFn: async (payload: any) => {
     const res = await api.post('/api/v1/treinos/gerar', payload);
     return res.data;
   });
 }
+

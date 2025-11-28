@@ -48,7 +48,7 @@ export function AlunosProvider({
   });
 
   // mutation para criar aluno; no onSuccess usamos o queryClient recebido como prop
-  const mutation = useMutation<any, Error, any>(criarAlunoApi, {
+  const mutation = useMutation<any, Error, any>({ mutationFn: criarAlunoApi,
     onSuccess: () => {
       try {
         if (queryClient) {
@@ -89,5 +89,6 @@ export function useAlunosContext() {
   if (!ctx) throw new Error('useAlunosContext must be used within AlunosProvider');
   return ctx;
 }
+
 
 
