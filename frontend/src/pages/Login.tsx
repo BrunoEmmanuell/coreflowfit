@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hook/useAuth';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -15,7 +15,6 @@ export default function Login() {
 
   async function onSubmit(data: FormData) {
     try {
-      // Agora envia o username em vez do email
       await auth.login(data.username, data.password);
       navigate('/');
     } catch (e: any) {
@@ -48,7 +47,7 @@ export default function Login() {
         </div>
 
         {/* --- Formulário --- */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
             <Input 
               {...register('username')} 
@@ -65,15 +64,13 @@ export default function Login() {
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <input 
-                type="checkbox" 
-                id="remember" 
-                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
-              />
-              <label htmlFor="remember" className="text-xs text-slate-500 select-none cursor-pointer font-medium">Manter-me conectado</label>
-            </div>
+          <div className="flex items-center gap-2 cursor-pointer">
+            <input 
+              type="checkbox" 
+              id="remember" 
+              className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
+            />
+            <label htmlFor="remember" className="text-xs text-slate-500 select-none cursor-pointer font-medium">Manter-me conectado</label>
           </div>
 
           <Button 
@@ -84,15 +81,9 @@ export default function Login() {
             Entrar
           </Button>
         </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-xs text-slate-500">
-            Não tem conta?{' '}
-            <Link to="/register" className="text-slate-700 font-bold hover:text-blue-600 hover:underline transition-colors">
-              Cadastre-se
-            </Link>
-          </p>
-        </div>
+        
+        {/* Rodapé vazio (sem link de cadastro) */}
+        <div className="mt-6"></div>
       </div>
     </div>
   );

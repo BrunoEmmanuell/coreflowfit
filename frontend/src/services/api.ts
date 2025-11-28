@@ -1,33 +1,27 @@
-
+// src/services/api.ts
 import axios from 'axios';
-import { getToken, clearToken } from './auth';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://coreflowfit-backend.onrender.com';
+const baseURL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000';
 
-export const api = axios.create({
-  baseURL: BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
+const api = axios.create({
+  baseURL, // exemplo: https://coreflowfit-backend.onrender.com
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  // withCredentials: true, // ative se backend usa cookies HttpOnly para refresh token
 });
 
+// Adiciona Authorization automaticamente se houver token
 api.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token && config.headers) {
-    config.headers['Authorization'] = `Bearer ${token}`;
+  try {
+    const token = localStorage.getItem('access_token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (e) {
+    // ignore
   }
   return config;
 });
-
-api.interceptors.response.use(
-  res => res,
-  (error) => {
-    const status = error?.response?.status;
-    if (status === 401) {
-      clearToken();
-      // optional: redirect to login
-    }
-    return Promise.reject(error);
-  }
-);
 
 export default api;
