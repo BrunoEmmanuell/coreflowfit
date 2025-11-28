@@ -1,9 +1,9 @@
-﻿
+
 import { useMutation, useQuery } from '@tanstack/react-query';
 import api from '../services/api';
 
 export function useTreinosDoAluno(aluno_id?: number) {
-  return useQuery({ queryKey: ['treinos', aluno_id], queryFn: async ( }) => {
+  return useQuery(['treinos', aluno_id], async () => {
     const res = await api.get(`/api/v1/treinos/aluno/${aluno_id}`);
     return res.data;
   }, { enabled: Boolean(aluno_id) });
@@ -15,4 +15,3 @@ export function useGerarTreino() {
     return res.data;
   });
 }
-
