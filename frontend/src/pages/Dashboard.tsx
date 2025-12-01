@@ -1,73 +1,149 @@
-﻿import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAlunos } from '@/hooks/useAlunos'
-import Layout from '@/components/layout/Layout'
-import StudentsGrid from '@/components/StudentsGrid'
-import NewStudentModal from '@/components/NewStudentModal'
-import Button from '@/components/ui/Button'
-import { Plus, Search } from 'lucide-react'
-import Input from '@/components/ui/Input'
+import { useEffect, useState } from 'react';
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/lib/api';
+import { toast } from 'sonner';
+import { Dumbbell, LogOut, Plus, User } from 'lucide-react';
+
+interface Aluno {
+  id: string;
+  nome: string;
+  objetivo?: string;
+  nivel?: string;
+  peso?: number;
+  altura?: number;
+}
 
 export default function Dashboard() {
-  // Correção: Mapeando 'data' para 'alunos'
-  const { data: alunos, isLoading, refetch } = useAlunos()
-  
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [search, setSearch] = useState('')
-  const navigate = useNavigate()
+  const [alunos, setAlunos] = useState<Aluno[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { logout } = useAuth();
+  const [, setLocation] = useLocation();
 
-  // Filtragem simples local
-  const filteredAlunos = (alunos || [])?.filter((a: any) => 
-    a.nome?.toLowerCase().includes(search.toLowerCase())
-  )
+  useEffect(() => {
+    loadAlunos();
+  }, []);
+
+  const loadAlunos = async () => {
+    try {
+      const response = await api.get('/api/v1/alunos/');
+      setAlunos(response.data);
+    } catch (error: any) {
+      toast.error('Erro ao carregar alunos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setLocation('/login');
+  };
 
   return (
-    <Layout>
-      <div className="space-y-8">
-        
-        {/* Header do Dashboard */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Meus Alunos</h1>
-            <p className="text-slate-500 text-sm">Gerencie seus alunos e crie treinos personalizados</p>
-          </div>
-          
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="w-full md:w-64">
-              <Input 
-                placeholder="Buscar aluno..." 
-                leftIcon={<Search size={18} className="text-slate-400"/>}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="bg-white"
-              />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-600 p-2 rounded-lg">
+              <Dumbbell className="w-6 h-6 text-white" />
             </div>
-            <Button onClick={() => setIsModalOpen(true)} className="shrink-0 gap-2 shadow-lg shadow-blue-200">
-              <Plus size={20} /> Novo Aluno
-            </Button>
+            <h1 className="text-2xl font-bold text-gray-900">CoreFlowFit</h1>
           </div>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair
+          </Button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">Meus Alunos</h2>
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Aluno
+          </Button>
         </div>
 
-        {/* Grid de Alunos */}
-        <StudentsGrid 
-          students={filteredAlunos} 
-          loading={isLoading}
-          onViewProfile={(id: string) => navigate(`/aluno/${id}`)}
-          onGenerateTreino={(id: string) => navigate(`/aluno/${id}`)} 
-          onAddFirst={() => setIsModalOpen(true)}
-        />
-
-        {/* Modal de Criação */}
-        <NewStudentModal 
-          open={isModalOpen} 
-          onClose={() => {
-            setIsModalOpen(false)
-            // refetch não é estritamente necessário se usarmos invalidateQueries, mas mal não faz
-            refetch() 
-          }} 
-        />
-        
-      </div>
-    </Layout>
-  )
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">Carregando alunos...</p>
+          </div>
+        ) : alunos.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <User className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Nenhum aluno cadastrado
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Comece adicionando seu primeiro aluno
+              </p>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Aluno
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {alunos.map((aluno) => (
+              <Card key={aluno.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-100 p-3 rounded-full">
+                        <User className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">{aluno.nome}</CardTitle>
+                        {aluno.objetivo && (
+                          <p className="text-sm text-gray-500">{aluno.objetivo}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    {aluno.nivel && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Nível:</span>
+                        <span className="font-medium">{aluno.nivel}</span>
+                      </div>
+                    )}
+                    {aluno.peso && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Peso:</span>
+                        <span className="font-medium">{aluno.peso} kg</span>
+                      </div>
+                    )}
+                    {aluno.altura && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Altura:</span>
+                        <span className="font-medium">{aluno.altura} cm</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      Ver Perfil
+                    </Button>
+                    <Button size="sm" className="flex-1">
+                      Gerar Treino
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
 }

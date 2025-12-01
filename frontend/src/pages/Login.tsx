@@ -1,90 +1,77 @@
-﻿import React from 'react';
-import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hook/useAuth';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { User, Lock } from 'lucide-react';
-
-type FormData = { username: string; password: string };
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { Dumbbell } from 'lucide-react';
 
 export default function Login() {
-  const { register, handleSubmit } = useForm<FormData>();
-  const auth = useAuth();
-  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const [, setLocation] = useLocation();
 
-  async function onSubmit(data: FormData) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      await auth.login(data.username, data.password);
-      navigate('/');
-    } catch (e: any) {
-      alert(e?.response?.data?.detail || e.message || 'Erro no login');
+      await login(email, password);
+      toast.success('Login realizado com sucesso!');
+      setLocation('/dashboard');
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Erro ao fazer login');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    // Fundo: Gradiente Azul Profundo (Fiel ao Mockup)
-    <div className="min-h-screen w-full flex items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400 via-blue-600 to-indigo-900 p-4">
-      
-      <div className="w-full max-w-[400px] bg-white rounded-2xl shadow-2xl p-8 relative">
-        
-        {/* --- Header da Logo --- */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center items-center gap-2 mb-3">
-            {/* Ícone: Silhueta de Corrida (Estilo CoreFlowFit) */}
-            <svg className="w-9 h-9 text-blue-600" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16.5 6C17.8807 6 19 4.88071 19 3.5C19 2.11929 17.8807 1 16.5 1C15.1193 1 14 2.11929 14 3.5C14 4.88071 15.1193 6 16.5 6Z" />
-              <path d="M12.5 7.5C10.85 7.5 9.6 7.9 8.6 8.5L3.5 11.2L4.8 13.6L8.5 11.6V17.5L5 22.5L7.5 24L11.5 18.5L14 21V24H16.5V19.5L13.5 16.5V11.5L16.5 14.5L18.8 12.8C18.8 12.8 17.5 8.5 16.5 8C15.5 7.5 13.5 7.5 12.5 7.5Z" />
-            </svg>
-            
-            {/* Tipografia da Marca */}
-            <div className="text-2xl font-bold tracking-tight">
-              <span className="text-blue-600">Core</span>
-              <span className="text-slate-700">FlowFit</span>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="bg-blue-600 p-3 rounded-full">
+              <Dumbbell className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h2 className="text-slate-600 font-medium text-sm">Entre na sua conta</h2>
-        </div>
-
-        {/* --- Formulário --- */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-4">
-            <Input 
-              {...register('username')} 
-              placeholder="Seu usuário" 
-              leftIcon={<User size={18} className="text-slate-400" />}
-              className="h-11 bg-white border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg text-sm"
-            />
-            <Input 
-              {...register('password')} 
-              type="password" 
-              placeholder="Senha"
-              leftIcon={<Lock size={18} className="text-slate-400" />}
-              className="h-11 bg-white border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-lg text-sm" 
-            />
-          </div>
-
-          <div className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="checkbox" 
-              id="remember" 
-              className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
-            />
-            <label htmlFor="remember" className="text-xs text-slate-500 select-none cursor-pointer font-medium">Manter-me conectado</label>
-          </div>
-
-          <Button 
-            type="submit" 
-            variant="primary" 
-            className="w-full h-11 text-sm font-bold bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 shadow-md shadow-blue-500/20 border-none rounded-lg transition-all"
-          >
-            Entrar
-          </Button>
-        </form>
-        
-        {/* Rodapé vazio (sem link de cadastro) */}
-        <div className="mt-6"></div>
-      </div>
+          <CardTitle className="text-2xl font-bold">CoreFlowFit</CardTitle>
+          <CardDescription>Entre com suas credenciais para acessar</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Entrando...' : 'Entrar'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

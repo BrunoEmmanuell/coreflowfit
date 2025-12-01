@@ -1,11 +1,20 @@
+import { useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { useAuth } from '@/contexts/AuthContext';
 
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuthContext } from '../contexts/AuthContext';
+export default function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
 
-export default function PrivateRoute() {
-  const { token, loading } = useAuthContext();
-  if (loading) return <div className="p-6">Carregando...</div>;
-  if (!token) return <Navigate to="/login" replace />;
-  return <Outlet />;
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLocation('/login');
+    }
+  }, [isAuthenticated, setLocation]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return <>{children}</>;
 }

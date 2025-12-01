@@ -1,49 +1,55 @@
-﻿import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './contexts/AuthContext';
-import { AlunosProvider } from './contexts/AlunosContext';
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import NotFound from "@/pages/NotFound";
+import { Route, Switch, Redirect } from "wouter";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import PrivateRoute from "./components/PrivateRoute";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
 
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import AlunoProfile from './pages/AlunoProfile';
-import TreinoDetail from './pages/TreinoDetail';
-import Evolucao from './pages/Evolucao';
-import Configuracoes from './pages/Configuracoes'; // Nova página
-import PrivateRoute from './components/PrivateRoute';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 2 },
-  },
-});
-
-;(window as any).__REACT_QUERY_CLIENT = queryClient;
-
-export default function App() {
+function Router() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AlunosProvider queryClient={queryClient}>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              
-              {/* Rotas Privadas (Só Admin vê) */}
-              <Route element={<PrivateRoute />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/aluno/:aluno_id" element={<AlunoProfile />} />
-                <Route path="/treino/:id" element={<TreinoDetail />} />
-                <Route path="/evolucao" element={<Evolucao />} />
-                <Route path="/configuracoes" element={<Configuracoes />} />
-              </Route>
-
-              {/* Redirecionar qualquer erro para o login */}
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            </Routes>
-          </BrowserRouter>
-        </AlunosProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <Switch>
+      <Route path="/">
+        {() => <Redirect to="/dashboard" />}
+      </Route>
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
+      <Route path="/dashboard">
+        {() => (
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        )}
+      </Route>
+      <Route path="/404" component={NotFound} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
+
+// NOTE: About Theme
+// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
+//   to keep consistent foreground/background color across components
+// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="light">
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
+}
+
+export default App;
