@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: coreflowdb
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
+#    ports:
       - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -20,15 +20,15 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+
     working_dir: /app
     volumes:
       - ./backend:/app/backend
     environment:
       - DATABASE_URL=postgresql+psycopg2://postgres:sua_senha_segura@db:5432/coreflowdb
       - ENVIRONMENT=development
-    ports:
-      - "8000:8000"
+#    ports:
+#      - "8000:8000"
     depends_on:
       - db
 
@@ -36,8 +36,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    ports:
-      - "3000:80"
+#    ports:
+#      - "3000:80"
     depends_on:
       - backend
 

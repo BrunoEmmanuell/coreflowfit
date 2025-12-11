@@ -1,14 +1,13 @@
-// src/components/ui/Skeleton.tsx
-import React from 'react'
-import { cn } from '@/utils/cn'
+import { cn } from "@/lib/utils";
 
-export function Skeleton({ className }: { className?: string }) {
+function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn(
-        'animate-pulse rounded-md bg-slate-200/70 dark:bg-slate-700/40',
-        className
-      )}
+      data-slot="skeleton"
+      className={cn("bg-accent animate-pulse rounded-md", className)}
+      {...props}
     />
-  )
+  );
 }
+
+export { Skeleton };

@@ -11,6 +11,10 @@ RUN npm ci --silent
 
 COPY . .
 # The command below creates the /app/dist folder
+# Adiciona a variável de ambiente para o build do Vite
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # Stage 2: Web Server (Nginx)

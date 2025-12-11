@@ -1,0 +1,49 @@
+# render.yaml - Blueprint para implantação no Render
+
+services:
+  # 1. Serviço de Banco de Dados PostgreSQL
+  - type: pserv
+    name: coreflowfit-db
+    plan: starter
+    databaseName: coreflowdb
+    # Render irá gerar automaticamente a DATABASE_URL para o backend
+
+  # 2. Serviço de Backend (FastAPI)
+  - type: web
+    name: coreflowfit-backend
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    # Render irá usar a porta 10000 por padrão, mas o Dockerfile expõe 8000.
+    # O script de start será ajustado para usar a variável $PORT do Render.
+    
+    # Conecta ao banco de dados criado acima
+    database:
+      name: coreflowfit-db
+      
+    # Variáveis de ambiente (Render irá injetar a DATABASE_URL automaticamente)
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true # Gere uma chave secreta forte
+      - key: DATABASE_URL
+        fromDatabase:
+          name: coreflowfit-db
+          property: connectionString
+          
+  # 3. Serviço de Frontend (React/Nginx)
+  - type: web
+    name: coreflowfit-frontend
+    env: docker
+    dockerfilePath: frontend/Dockerfile
+    # O Nginx no Dockerfile do frontend já está configurado para servir na porta 80,
+    # que é o padrão para serviços web no Render.
+    
+    # O Render precisa saber o URL do backend para que o frontend possa se comunicar.
+    # Assumindo que o frontend usa uma variável de ambiente para a URL da API.
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: coreflowfit-backend
+          property: hostport # Isso fornecerá o URL interno do backend no Render

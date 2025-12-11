@@ -1,93 +1,70 @@
-import React from 'react'
-import { cn } from '@/utils/cn' // caso não exista, posso gerar também
+import { useDialogComposition } from "@/components/ui/dialog";
+import { useComposition } from "@/hooks/useComposition";
+import { cn } from "@/lib/utils";
+import * as React from "react";
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string
-  error?: string | boolean
-  success?: boolean
-  leftIcon?: React.ReactNode
-  rightIcon?: React.ReactNode
+function Input({
+  className,
+  type,
+  onKeyDown,
+  onCompositionStart,
+  onCompositionEnd,
+  ...props
+}: React.ComponentProps<"input">) {
+  // Get dialog composition context if available (will be no-op if not inside Dialog)
+  const dialogComposition = useDialogComposition();
+
+  // Add composition event handlers to support input method editor (IME) for CJK languages.
+  const {
+    onCompositionStart: handleCompositionStart,
+    onCompositionEnd: handleCompositionEnd,
+    onKeyDown: handleKeyDown,
+  } = useComposition<HTMLInputElement>({
+    onKeyDown: (e) => {
+      // Check if this is an Enter key that should be blocked
+      const isComposing = (e.nativeEvent as any).isComposing || dialogComposition.justEndedComposing();
+
+      // If Enter key is pressed while composing or just after composition ended,
+      // don't call the user's onKeyDown (this blocks the business logic)
+      if (e.key === "Enter" && isComposing) {
+        return;
+      }
+
+      // Otherwise, call the user's onKeyDown
+      onKeyDown?.(e);
+    },
+    onCompositionStart: e => {
+      dialogComposition.setComposing(true);
+      onCompositionStart?.(e);
+    },
+    onCompositionEnd: e => {
+      // Mark that composition just ended - this helps handle the Enter key that confirms input
+      dialogComposition.markCompositionEnd();
+      // Delay setting composing to false to handle Safari's event order
+      // In Safari, compositionEnd fires before the ESC keydown event
+      setTimeout(() => {
+        dialogComposition.setComposing(false);
+      }, 100);
+      onCompositionEnd?.(e);
+    },
+  });
+
+  return (
+    <input
+      type={type}
+      data-slot="input"
+      className={cn(
+        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+        className
+      )}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
+      onKeyDown={handleKeyDown}
+      {...props}
+    />
+  );
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      label,
-      error,
-      success,
-      leftIcon,
-      rightIcon,
-      disabled,
-      className,
-      ...rest
-    },
-    ref
-  ) => {
-    const state = error ? 'error' : success ? 'success' : 'default'
-
-    const baseStyles =
-      'w-full px-3 py-2 rounded-lg border bg-white text-sm transition-all focus:outline-none'
-
-    const stateStyles = {
-      default:
-        'border-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200',
-      error:
-        'border-rose-500 text-rose-600 placeholder-rose-400 focus:border-rose-500 focus:ring-4 focus:ring-rose-200',
-      success:
-        'border-green-500 text-green-600 placeholder-green-400 focus:border-green-500 focus:ring-4 focus:ring-green-200',
-    }
-
-    const disabledStyles =
-      'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200'
-
-    return (
-      <div className="flex flex-col gap-1 w-full">
-        {label && (
-          <label className="text-sm font-medium text-slate-700">
-            {label}
-          </label>
-        )}
-
-        <div className="relative flex items-center">
-          {leftIcon && (
-            <span className="absolute left-3 text-slate-500 flex items-center">
-              {leftIcon}
-            </span>
-          )}
-
-          <input
-            ref={ref}
-            disabled={disabled}
-            className={cn(
-              baseStyles,
-              stateStyles[state],
-              disabled && disabledStyles,
-              leftIcon && 'pl-10',
-              rightIcon && 'pr-10',
-              className
-            )}
-            {...rest}
-          />
-
-          {rightIcon && (
-            <span className="absolute right-3 text-slate-500 flex items-center">
-              {rightIcon}
-            </span>
-          )}
-        </div>
-
-        {typeof error === 'string' && (
-          <span className="text-xs text-rose-600">{error}</span>
-        )}
-
-        {success && !error && (
-          <span className="text-xs text-green-600">Tudo certo!</span>
-        )}
-      </div>
-    )
-  }
-)
-
-Input.displayName = 'Input'
-
-export default Input
+export { Input };
