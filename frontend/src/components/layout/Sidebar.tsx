@@ -1,9 +1,9 @@
 ﻿import React, { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/utils/cn'
-import Button from '@/components/ui/Button'
+import { Button } from '@/components/ui/Button'
 import { Home, Users, BarChart, LogOut } from 'lucide-react'
-import { useAuthContext } from '@/contexts/AuthContext'
+import { useAuth as useAuthContext } from '@/contexts/AuthContext'
 
 const SIDEBAR_KEY = 'cf_sidebar_collapsed'
 

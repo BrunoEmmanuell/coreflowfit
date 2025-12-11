@@ -1,6 +1,6 @@
 // src/components/ui/ApiAlert.tsx
 import React from 'react'
-import Alert from './Alert'
+import { Alert } from './Alert'
 import { getApiErrorMessage } from '@/utils/apiErrors'
 
 type Props = {

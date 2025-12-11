@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/services/api'
 import Modal from '@/components/ui/Modal'
-import Input from '@/components/ui/Input'
-import Select from '@/components/ui/Select'
-import Button from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+import { Button } from '@/components/ui/Button'
 import { User, Mail, Ruler, Scale } from 'lucide-react'
 
 type StudentFormData = {

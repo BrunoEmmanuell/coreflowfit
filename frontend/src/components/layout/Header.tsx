@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from '@/components/ui/Button'
+import { Button } from '@/components/ui/Button'
 import { Menu } from 'lucide-react'
 
 export default function Header({ onMobileOpen }: { onMobileOpen: () => void }) {

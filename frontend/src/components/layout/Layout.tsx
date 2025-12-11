@@ -1,7 +1,7 @@
 ﻿import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, Users, Home, BarChart, LogOut, Calendar, Settings, DollarSign, Dumbbell } from 'lucide-react'
-import { useAuthContext } from '@/contexts/AuthContext'
+import { useAuth as useAuthContext } from '@/contexts/AuthContext'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
